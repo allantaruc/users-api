@@ -20,6 +20,20 @@ This project follows TDD (Test-Driven Development) practices and uses:
 - Moq for mocking dependencies
 - Entity Framework Core for data access
 
+## Code Coverage
+
+This project includes code coverage analysis using [Coverlet](https://github.com/coverlet-coverage/coverlet) and [ReportGenerator](https://github.com/danielpalme/ReportGenerator).
+
+To generate a code coverage report:
+
+1. Run the `code-coverage.sh` script: `./code-coverage.sh`
+2. View the HTML report at `coverage-report/index.html`
+
+The script will:
+- Execute all tests with coverage collection
+- Generate an HTML report with detailed metrics
+- Display coverage results by class and method
+
 ## CI/CD
 
 The project includes GitHub Actions workflows for:
