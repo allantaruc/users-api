@@ -62,6 +62,26 @@ These sample requests help verify that the API correctly implements all validati
 - Employment end date must be after start date
 - Required fields validation
 
+## API Documentation with Swagger
+
+The API includes Swagger/OpenAPI documentation, providing interactive exploration of all endpoints, request/response models, and validation requirements.
+
+### Accessing Swagger UI
+
+- **Development Environment**: Available at `/swagger` when running locally
+- **Production Environment**: Available at `/api-docs` on the deployed application
+
+### Features
+
+- **Interactive Documentation**: Test API endpoints directly from the browser
+- **Request Validation**: Shows required fields and data formats
+- **Response Schemas**: Displays the structure of all response objects
+- **Model Documentation**: Describes all entities with their properties and validation rules
+
+### Authentication
+
+The Swagger UI allows exploration of all endpoints without authentication requirements.
+
 ## Deployment
 
 The API is deployed on Render.com and is accessible at [https://users-api-jhnp.onrender.com/](https://users-api-jhnp.onrender.com/).

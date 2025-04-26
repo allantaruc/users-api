@@ -1,4 +1,6 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Users.Api.Data;
 using Users.Api.Data.Repositories;
 using Users.Api.Services;
@@ -20,8 +22,26 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>("database");
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// Add Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Users API",
+        Version = "v1",
+        Description = "An API for managing user information with EF Core and SQLite integration.",
+        Contact = new OpenApiContact
+        {
+            Name = "API Support",
+            Email = "support@usersapi.com"
+        }
+    });
+    
+    // Include XML comments in Swagger docs
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 var app = builder.Build();
 
@@ -35,7 +55,18 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Users API v1"));
+}
+else 
+{
+    // Add Swagger in production but with a different route
+    app.UseSwagger();
+    app.UseSwaggerUI(c => 
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Users API v1");
+        c.RoutePrefix = "api-docs"; // Access at /api-docs instead of /swagger
+    });
 }
 
 app.UseHttpsRedirection();
