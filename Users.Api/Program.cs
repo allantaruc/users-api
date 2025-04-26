@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Users.Api.Data;
+using Users.Api.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ builder.Services.AddControllers();
 // Configure Entity Framework with SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register repositories and services
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
