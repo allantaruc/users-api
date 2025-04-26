@@ -375,7 +375,7 @@ public class UserRepositoryTests
             .FirstAsync(u => u.Id == result.Id);
         
         updatedUser.Address.ShouldNotBeNull();
-        updatedUser.Address!.Street.ShouldBe("New Street");
+        updatedUser.Address.Street.ShouldBe("New Street");
         updatedUser.Address.City.ShouldBe("New City");
         updatedUser.Address.PostCode.ShouldBe(2000);
     }
