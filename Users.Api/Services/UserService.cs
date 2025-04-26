@@ -25,7 +25,8 @@ public class UserService(IUserRepository userRepository) : IUserService
 
     public async Task<User> GetUserByIdAsync(int id)
     {
-        return await userRepository.GetUserByIdAsync(id);
+        var user = await userRepository.GetUserByIdAsync(id) ?? throw new InvalidOperationException($"User with ID {id} not found.");
+        return user;
     }
 
     public async Task<User> UpdateUserAsync(int id, User request)

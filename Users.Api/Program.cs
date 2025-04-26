@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Users.Api.Data;
 using Users.Api.Data.Repositories;
+using Users.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Register repositories and services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

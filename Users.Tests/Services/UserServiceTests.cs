@@ -645,7 +645,7 @@ public class UserServiceTests
     }
     
     [Test]
-    public async Task GetUserByIdAsync_WithNonExistingUser_ShouldReturnNull()
+    public async Task GetUserByIdAsync_WithNonExistingUser_ShouldThrowException()
     {
         // Arrange
         const int userId = 999; // Non-existing user ID
@@ -653,11 +653,11 @@ public class UserServiceTests
         _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))!
             .ReturnsAsync((User?)null);
 
-        // Act
-        var result = await _userService.GetUserByIdAsync(userId);
-
-        // Assert
-        result.ShouldBeNull();
+        // Act & Assert
+        var exception = await Should.ThrowAsync<InvalidOperationException>(
+            async () => await _userService.GetUserByIdAsync(userId));
+        
+        exception.Message.ShouldContain($"User with ID {userId} not found");
         
         _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(userId), Times.Once);
     }
