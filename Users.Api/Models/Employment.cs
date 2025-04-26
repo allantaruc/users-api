@@ -8,4 +8,5 @@ public class Employment
     public uint? Salary { get; set; } //MANDATORY
     public DateTime? StartDate { get; set; } //MANDATORY
     public DateTime? EndDate { get; set; }        
+    public int UserId { get; set; }
 }
