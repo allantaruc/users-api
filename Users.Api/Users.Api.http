@@ -1,6 +1,180 @@
-@Users.Api_HostAddress = http://localhost:3001
+@address = https://localhost:3000
 
-GET {{Users.Api_HostAddress}}/weatherforecast/
+### GET User by ID
+GET {{address}}/api/users/1
 Accept: application/json
+
+### POST - Create a new user (valid data)
+POST {{address}}/api/users
+Content-Type: application/json
+
+{
+  "firstName": "Allan",
+  "lastName": "Taruc",
+  "email": "allan.b.taruc@gmail.com",
+  "address": {
+    "street": "Paltoc",
+    "city": "Manila",
+    "postCode": 1016
+  },
+  "employments": [
+    {
+      "company": "ACME Inc",
+      "monthsOfExperience": 24,
+      "salary": 75000,
+      "startDate": "2022-01-15"
+    }
+  ]
+}
+
+### POST - Create a user (duplicate email validation)
+POST {{address}}/api/users
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "email": "allan.b.taruc@gmail.com",
+  "address": {
+    "street": "456 Park Ave",
+    "city": "Boston",
+    "postCode": 20001
+  }
+}
+
+### POST - Create a user (employment date validation)
+POST {{address}}/api/users
+Content-Type: application/json
+
+{
+  "firstName": "Bob",
+  "lastName": "Johnson",
+  "email": "bob.johnson@example.com",
+  "employments": [
+    {
+      "company": "Problem Corp",
+      "monthsOfExperience": 12,
+      "salary": 50000,
+      "startDate": "2022-06-01",
+      "endDate": "2022-03-01"
+    }
+  ]
+}
+
+### PUT - Update user (valid data)
+PUT {{address}}/api/users/1
+Content-Type: application/json
+
+{
+  "firstName": "Allan B",
+  "lastName": "Taruc",
+  "email": "allan.taruc@gmail.com",
+  "address": {
+    "street": "789 Broadway",
+    "city": "Chicago",
+    "postCode": 60001
+  },
+  "employments": [
+    {
+      "company": "New Corp",
+      "monthsOfExperience": 36,
+      "salary": 90000,
+      "startDate": "2022-01-01"
+    }
+  ]
+}
+
+### PUT - Update user (address changes only)
+PUT {{address}}/api/users/1
+Content-Type: application/json
+
+{
+  "firstName": "Allan B",
+  "lastName": "Taruc",
+  "email": "allan.taruc@gmail.com",
+  "address": {
+    "street": "555 Fifth Ave",
+    "city": "San Francisco",
+    "postCode": 94101
+  }
+}
+
+### PUT - Update user (employment changes only)
+PUT {{address}}/api/users/1
+Content-Type: application/json
+
+{
+  "firstName": "Allan B",
+  "lastName": "Taruc",
+  "email": "allan.taruc@gmail.com",
+  "employments": [
+    {
+      "company": "Latest Corp",
+      "monthsOfExperience": 48,
+      "salary": 110000,
+      "startDate": "2020-01-01",
+      "endDate": "2023-12-31"
+    },
+    {
+      "company": "Second Job",
+      "monthsOfExperience": 24,
+      "salary": 85000,
+      "startDate": "2018-01-01",
+      "endDate": "2019-12-31"
+    }
+  ]
+}
+
+### PUT - Update user (invalid employment dates)
+PUT {{address}}/api/users/1
+Content-Type: application/json
+
+{
+  "firstName": "Allan B",
+  "lastName": "Taruc",
+  "email": "allan.taruc@gmail.com",
+  "employments": [
+    {
+      "company": "Problem Corp",
+      "monthsOfExperience": 12,
+      "salary": 50000,
+      "startDate": "2022-06-01",
+      "endDate": "2022-03-01"
+    }
+  ]
+}
+
+### POST - Create another user (valid data)
+POST {{address}}/api/users
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "email": "jane.smithc@email.com",
+  "address": {
+    "street": "Paltoc",
+    "city": "Manila",
+    "postCode": 1016
+  },
+  "employments": [
+    {
+      "company": "ACME Inc",
+      "monthsOfExperience": 24,
+      "salary": 75000,
+      "startDate": "2022-01-15"
+    }
+  ]
+}
+
+### PUT - Update user (duplicate email)
+PUT {{address}}/api/users/2
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "email": "allan.taruc@gmail.com"
+}
 
 ###

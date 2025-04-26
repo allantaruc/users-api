@@ -34,6 +34,34 @@ The script will:
 - Generate an HTML report with detailed metrics
 - Display coverage results by class and method
 
+## API Testing
+
+The project includes a comprehensive HTTP request file (`Users.Api.http`) that demonstrates all API endpoints and validation scenarios. This file can be used with REST Client extensions in VS Code, JetBrains Rider, or other HTTP client tools.
+
+### Available Test Scenarios
+
+- **GET User by ID**: Retrieve user details by ID
+- **POST - Create a new user**: Create a user with address and employment information
+- **POST - Create a user (duplicate email validation)**: Test email uniqueness validation
+- **POST - Create a user (employment date validation)**: Test validation of employment dates
+- **PUT - Update user (valid data)**: Update all user information including address and employment
+- **PUT - Update user (address changes only)**: Test partial updates with address changes
+- **PUT - Update user (employment changes only)**: Test partial updates with employment changes
+- **PUT - Update user (invalid employment dates)**: Test validation of employment dates during update
+- **PUT - Update user (duplicate email)**: Test email uniqueness validation during update
+
+### How to Use
+
+1. Make sure your API is running at the URL specified in the `.http` file (default: `https://localhost:3000`)
+2. Open `Users.Api.http` in an editor with REST Client support
+3. Click on the "Send Request" link above each request or use your editor's command to send HTTP requests
+4. Review the responses to verify correct behavior
+
+These sample requests help verify that the API correctly implements all validation rules:
+- Email uniqueness across all users
+- Employment end date must be after start date
+- Required fields validation
+
 ## CI/CD
 
 The project includes GitHub Actions workflows for:
