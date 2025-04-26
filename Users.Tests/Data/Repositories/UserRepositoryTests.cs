@@ -176,4 +176,32 @@ public class UserRepositoryTests
         // Assert
         result.ShouldBeNull();
     }
+    
+    [Test]
+    public async Task CreateUserAsync_WithDuplicateEmail_ShouldThrowException()
+    {
+        // Arrange
+        var existingUser = new User
+        {
+            FirstName = "Existing",
+            LastName = "User",
+            Email = "duplicate@example.com"
+        };
+        
+        await _dbContext.Users.AddAsync(existingUser);
+        await _dbContext.SaveChangesAsync();
+        
+        var newUser = new User
+        {
+            FirstName = "New",
+            LastName = "User",
+            Email = "duplicate@example.com"
+        };
+        
+        // Act & Assert
+        var exception = await Should.ThrowAsync<InvalidOperationException>(
+            async () => await _userRepository.CreateUserAsync(newUser));
+        
+        exception.Message.ShouldContain("already exists");
+    }
 } 
