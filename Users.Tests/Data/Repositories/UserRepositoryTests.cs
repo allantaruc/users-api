@@ -328,4 +328,132 @@ public class UserRepositoryTests
         exception.Message.ShouldContain("end date");
         exception.Message.ShouldContain("must be after start date");
     }
+    
+    [Test]
+    public async Task UpdateUserAsync_ShouldUpdateAddress()
+    {
+        // Arrange
+        var user = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com",
+            Address = new Address
+            {
+                Street = "Old Street",
+                City = "Old City",
+                PostCode = 1000
+            }
+        };
+        
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+        
+        // Retrieve the user for update
+        var savedUser = await _dbContext.Users
+            .Include(u => u.Address)
+            .FirstAsync(u => u.Email == user.Email);
+        
+        // Modify address
+        savedUser.Address!.Street = "New Street";
+        savedUser.Address.City = "New City";
+        savedUser.Address.PostCode = 2000;
+        
+        // Act
+        var result = await _userRepository.UpdateUserAsync(savedUser);
+        
+        // Assert
+        result.ShouldNotBeNull();
+        result.Address.ShouldNotBeNull();
+        result.Address!.Street.ShouldBe("New Street");
+        result.Address.City.ShouldBe("New City");
+        result.Address.PostCode.ShouldBe(2000);
+        
+        // Verify the changes were saved to the database
+        var updatedUser = await _dbContext.Users
+            .Include(u => u.Address)
+            .FirstAsync(u => u.Id == result.Id);
+        
+        updatedUser.Address.ShouldNotBeNull();
+        updatedUser.Address.Street.ShouldBe("New Street");
+        updatedUser.Address.City.ShouldBe("New City");
+        updatedUser.Address.PostCode.ShouldBe(2000);
+    }
+    
+    [Test]
+    public async Task UpdateUserAsync_ShouldUpdateEmployments()
+    {
+        // Arrange
+        var user = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com",
+            Employments =
+            [
+                new Employment
+                {
+                    Company = "Old Company",
+                    MonthsOfExperience = 12,
+                    Salary = 50000,
+                    StartDate = new DateTime(2020, 1, 1),
+                    EndDate = new DateTime(2021, 1, 1)
+                }
+            ]
+        };
+        
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+        
+        // Retrieve the user for update
+        var savedUser = await _dbContext.Users
+            .Include(u => u.Employments)
+            .FirstAsync(u => u.Email == user.Email);
+        
+        // Modify existing employment and add a new one
+        savedUser.Employments[0].Company = "Updated Company";
+        savedUser.Employments[0].MonthsOfExperience = 24;
+        savedUser.Employments[0].Salary = 75000;
+        
+        savedUser.Employments.Add(new Employment
+        {
+            Company = "New Company",
+            MonthsOfExperience = 6,
+            Salary = 60000,
+            StartDate = new DateTime(2022, 1, 1)
+        });
+        
+        // Act
+        var result = await _userRepository.UpdateUserAsync(savedUser);
+        
+        // Assert
+        result.ShouldNotBeNull();
+        result.Employments.ShouldNotBeNull();
+        result.Employments.Count.ShouldBe(2);
+        
+        var updatedEmployment = result.Employments.First(e => e.Company == "Updated Company");
+        updatedEmployment.ShouldNotBeNull();
+        updatedEmployment.MonthsOfExperience.HasValue.ShouldBeTrue();
+        updatedEmployment.MonthsOfExperience!.Value.ShouldBe(24U);
+        updatedEmployment.Salary.HasValue.ShouldBeTrue();
+        updatedEmployment.Salary!.Value.ShouldBe(75000U);
+        
+        var newEmployment = result.Employments.First(e => e.Company == "New Company");
+        newEmployment.ShouldNotBeNull();
+        newEmployment.MonthsOfExperience.HasValue.ShouldBeTrue();
+        newEmployment.MonthsOfExperience!.Value.ShouldBe(6U);
+        newEmployment.Salary.HasValue.ShouldBeTrue();
+        newEmployment.Salary!.Value.ShouldBe(60000U);
+        newEmployment.StartDate.ShouldBe(new DateTime(2022, 1, 1));
+        newEmployment.EndDate.ShouldBeNull();
+        
+        // Verify the changes were saved to the database
+        var updatedUser = await _dbContext.Users
+            .Include(u => u.Employments)
+            .FirstAsync(u => u.Id == result.Id);
+        
+        updatedUser.Employments.Count.ShouldBe(2);
+        updatedUser.Employments.Any(e => e.Company == "Updated Company").ShouldBeTrue();
+        updatedUser.Employments.Any(e => e.Company == "New Company").ShouldBeTrue();
+    }
 } 
