@@ -121,4 +121,38 @@ public class UserServiceTests
         _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(It.IsAny<int>()), Times.Never);
         _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.IsAny<User>()), Times.Never);
     }
+
+    [Test]
+    public async Task CreateUserAsync_WithInvalidEmploymentDates_ShouldThrowException()
+    {
+        // Arrange
+        var request = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com",
+            Employments =
+            [
+                new Employment
+                {
+                    Company = "Problem Corp",
+                    MonthsOfExperience = 12,
+                    Salary = 50000,
+                    StartDate = new DateTime(2022, 6, 1),
+                    EndDate = new DateTime(2022, 3, 1) // End date before start date (invalid)
+                }
+            ]
+        };
+
+        _mockUserRepository.Setup(repo => repo.CreateUserAsync(It.IsAny<User>()))
+            .ThrowsAsync(new ArgumentException("Employment end date must be after start date."));
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<ArgumentException>(
+            async () => await _userService.CreateUserAsync(request));
+        
+        exception.Message.ShouldContain("date");
+        
+        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.IsAny<User>()), Times.Once);
+    }
 } 
