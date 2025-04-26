@@ -362,4 +362,150 @@ public class UsersControllerTests
         
         _mockUserService.Verify(service => service.UpdateUserAsync(userId, updateRequest), Times.Once);
     }
+
+    [Test]
+    public async Task UpdateUser_WithAddressChangesOnly_ShouldUpdateAddress()
+    {
+        // Arrange
+        const int userId = 1;
+        var updateRequest = new User
+        {
+            FirstName = "Allan", // Required fields
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com",
+            Address = new Address
+            {
+                Street = "New Street",
+                City = "New City",
+                PostCode = 2000
+            }
+            // No employment information
+        };
+
+        var updatedUser = new User
+        {
+            Id = userId,
+            FirstName = updateRequest.FirstName,
+            LastName = updateRequest.LastName,
+            Email = updateRequest.Email,
+            Address = updateRequest.Address,
+            Employments = new List<Employment>
+            {
+                new Employment
+                {
+                    Company = "Existing Company", // This should remain unchanged
+                    MonthsOfExperience = 24,
+                    Salary = 75000,
+                    StartDate = new DateTime(2022, 1, 15)
+                }
+            }
+        };
+
+        _mockUserService.Setup(service => service.UpdateUserAsync(userId, updateRequest))
+            .ReturnsAsync(updatedUser);
+
+        // Act
+        var result = await _controller.UpdateUser(userId, updateRequest);
+
+        // Assert
+        result.ShouldNotBeNull();
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnValue = okResult.Value.ShouldBeOfType<User>();
+        
+        // Check updated address
+        returnValue.Address.ShouldNotBeNull();
+        returnValue.Address!.Street.ShouldBe("New Street");
+        returnValue.Address.City.ShouldBe("New City");
+        returnValue.Address.PostCode.ShouldBe(2000);
+        
+        // Check employments preserved
+        returnValue.Employments.ShouldNotBeNull();
+        returnValue.Employments.Count.ShouldBe(1);
+        returnValue.Employments[0].Company.ShouldBe("Existing Company");
+        
+        _mockUserService.Verify(service => service.UpdateUserAsync(userId, updateRequest), Times.Once);
+    }
+
+    [Test]
+    public async Task UpdateUser_WithEmploymentChangesOnly_ShouldUpdateEmployments()
+    {
+        // Arrange
+        const int userId = 1;
+        var updateRequest = new User
+        {
+            FirstName = "Allan", // Required fields
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com",
+            Employments = new List<Employment>
+            {
+                new Employment
+                {
+                    Company = "New Company",
+                    MonthsOfExperience = 36,
+                    Salary = 90000,
+                    StartDate = new DateTime(2022, 1, 1)
+                },
+                new Employment
+                {
+                    Company = "Second Company",
+                    MonthsOfExperience = 24,
+                    Salary = 75000,
+                    StartDate = new DateTime(2020, 1, 1),
+                    EndDate = new DateTime(2021, 12, 31)
+                }
+            }
+        };
+
+        var updatedUser = new User
+        {
+            Id = userId,
+            FirstName = updateRequest.FirstName,
+            LastName = updateRequest.LastName,
+            Email = updateRequest.Email,
+            Address = new Address
+            {
+                Street = "Existing Street", // This should remain unchanged
+                City = "Existing City",
+                PostCode = 1000
+            },
+            Employments = updateRequest.Employments
+        };
+
+        _mockUserService.Setup(service => service.UpdateUserAsync(userId, updateRequest))
+            .ReturnsAsync(updatedUser);
+
+        // Act
+        var result = await _controller.UpdateUser(userId, updateRequest);
+
+        // Assert
+        result.ShouldNotBeNull();
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnValue = okResult.Value.ShouldBeOfType<User>();
+        
+        // Check address preserved
+        returnValue.Address.ShouldNotBeNull();
+        returnValue.Address!.Street.ShouldBe("Existing Street");
+        returnValue.Address.City.ShouldBe("Existing City");
+        returnValue.Address.PostCode.ShouldBe(1000);
+        
+        // Check updated employments
+        returnValue.Employments.ShouldNotBeNull();
+        returnValue.Employments.Count.ShouldBe(2);
+        
+        var newEmployment = returnValue.Employments.First(e => e.Company == "New Company");
+        newEmployment.ShouldNotBeNull();
+        newEmployment.MonthsOfExperience.HasValue.ShouldBeTrue();
+        newEmployment.MonthsOfExperience!.Value.ShouldBe(36U);
+        newEmployment.Salary.HasValue.ShouldBeTrue();
+        newEmployment.Salary!.Value.ShouldBe(90000U);
+        
+        var secondEmployment = returnValue.Employments.First(e => e.Company == "Second Company");
+        secondEmployment.ShouldNotBeNull();
+        secondEmployment.MonthsOfExperience.HasValue.ShouldBeTrue();
+        secondEmployment.MonthsOfExperience!.Value.ShouldBe(24U);
+        secondEmployment.EndDate.HasValue.ShouldBeTrue();
+        secondEmployment.EndDate!.Value.ShouldBe(new DateTime(2021, 12, 31));
+        
+        _mockUserService.Verify(service => service.UpdateUserAsync(userId, updateRequest), Times.Once);
+    }
 } 
