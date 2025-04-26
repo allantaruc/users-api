@@ -589,4 +589,94 @@ public class UserServiceTests
         _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(userId), Times.Once);
         _mockUserRepository.Verify(repo => repo.UpdateUserAsync(It.IsAny<User>()), Times.Once);
     }
+
+    [Test]
+    public async Task GetUserByIdAsync_WithExistingUser_ShouldReturnUser()
+    {
+        // Arrange
+        const int userId = 1;
+        var existingUser = new User
+        {
+            Id = userId,
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com",
+            Address = new Address
+            {
+                Street = "Paltoc",
+                City = "Manila",
+                PostCode = 1016
+            },
+            Employments =
+            [
+                new Employment
+                {
+                    Company = "ACME Inc",
+                    MonthsOfExperience = 24,
+                    Salary = 75000,
+                    StartDate = new DateTime(2022, 1, 15)
+                }
+            ]
+        };
+
+        _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+            .ReturnsAsync(existingUser);
+
+        // Act
+        var result = await _userService.GetUserByIdAsync(userId);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(userId);
+        result.FirstName.ShouldBe("Allan");
+        result.LastName.ShouldBe("Taruc");
+        result.Email.ShouldBe("allan.b.taruc@gmail.com");
+        
+        result.Address.ShouldNotBeNull();
+        result.Address!.Street.ShouldBe("Paltoc");
+        result.Address.City.ShouldBe("Manila");
+        result.Address.PostCode.ShouldBe(1016);
+        
+        result.Employments.ShouldNotBeNull();
+        result.Employments.Count.ShouldBe(1);
+        result.Employments[0].Company.ShouldBe("ACME Inc");
+        
+        _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(userId), Times.Once);
+    }
+    
+    [Test]
+    public async Task GetUserByIdAsync_WithNonExistingUser_ShouldReturnNull()
+    {
+        // Arrange
+        const int userId = 999; // Non-existing user ID
+        
+        _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))!
+            .ReturnsAsync((User?)null);
+
+        // Act
+        var result = await _userService.GetUserByIdAsync(userId);
+
+        // Assert
+        result.ShouldBeNull();
+        
+        _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(userId), Times.Once);
+    }
+    
+    [Test]
+    public async Task GetUserByIdAsync_WithRepositoryError_ShouldPropagateException()
+    {
+        // Arrange
+        const int userId = 1;
+        
+        _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+            .ThrowsAsync(new InvalidOperationException("Database connection error"));
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<InvalidOperationException>(
+            async () => await _userService.GetUserByIdAsync(userId));
+        
+        exception.Message.ShouldContain("Database connection error");
+        
+        _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(userId), Times.Once);
+    }
 } 
