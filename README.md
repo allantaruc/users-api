@@ -62,6 +62,52 @@ These sample requests help verify that the API correctly implements all validati
 - Employment end date must be after start date
 - Required fields validation
 
+## Deployment
+
+The API is deployed on Render.com and is accessible at [https://users-api-jhnp.onrender.com/](https://users-api-jhnp.onrender.com/).
+
+### Render.com Deployment Instructions
+
+To deploy this application on Render:
+
+1. **Prepare your repository**:
+   - Ensure your repository has a `Dockerfile` (included in this repo)
+   - Push changes to GitHub
+
+2. **Create a Web Service on Render**:
+   - Sign up/Sign in to [Render.com](https://render.com)
+   - Create a "New Web Service"
+   - Connect your GitHub repository
+   - Choose "Docker" as the environment
+   - Configure the service:
+     - Set a name for your service
+     - Select the appropriate region
+     - Choose the branch to deploy
+     - Set the Docker port to `10000` (matches the Dockerfile)
+
+3. **Configure Environment Variables**:
+   - Add the following environment variables:
+     - `ConnectionStrings__DefaultConnection`: For the database connection
+     - `ASPNETCORE_ENVIRONMENT`: Set to `Production`
+     - Any other application-specific variables
+
+4. **Deploy**:
+   - Click "Create Web Service"
+   - Wait for the build and deployment to complete
+
+5. **Accessing the API**:
+   - Once deployed, your API will be available at `https://[service-name].onrender.com/`
+   - Use the provided HTTP request file to test the endpoints against the deployed API
+
+### Updating Environment Variables Format
+
+In Render.com, use double underscores (`__`) for nested configuration values from `appsettings.json`. For example:
+
+```
+ConnectionStrings__DefaultConnection=Data Source=users.db
+Logging__LogLevel__Default=Information
+```
+
 ## CI/CD
 
 The project includes GitHub Actions workflows for:
