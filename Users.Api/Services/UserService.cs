@@ -22,7 +22,14 @@ public class UserService(IUserRepository userRepository) : IUserService
         // Save to repository
         return await userRepository.CreateUserAsync(user);
     }
-    
+
+    public async Task<User> GetUserByIdAsync(int id)
+    {
+        var user = await userRepository.GetUserByIdAsync(id) ?? 
+                   throw new InvalidOperationException($"User with ID {id} not found.");
+        return user;
+    }
+
     public async Task<User> UpdateUserAsync(int id, User request)
     {
         // Get existing user
@@ -48,7 +55,7 @@ public class UserService(IUserRepository userRepository) : IUserService
         }
         
         // Update employments if provided
-        if (request.Employments != null && request.Employments.Count > 0)
+        if (request.Employments.Count > 0)
         {
             existingUser.Employments = request.Employments;
         }
