@@ -16,12 +16,12 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         return user;
     }
 
-    public async Task<User?> GetUserByIdAsync(int id)
+    public async Task<User> GetUserByIdAsync(int id)
     {
-        return await dbContext.Users
+        return (await dbContext.Users
             .Include(u => u.Address)
             .Include(u => u.Employments)
-            .FirstOrDefaultAsync(u => u.Id == id);
+            .FirstOrDefaultAsync(u => u.Id == id) ?? null) ?? throw new InvalidOperationException();
     }
     
     public async Task<User> UpdateUserAsync(User user)
