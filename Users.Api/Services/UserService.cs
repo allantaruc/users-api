@@ -22,6 +22,40 @@ public class UserService(IUserRepository userRepository) : IUserService
         // Save to repository
         return await userRepository.CreateUserAsync(user);
     }
+    
+    public async Task<User> UpdateUserAsync(int id, User request)
+    {
+        // Get existing user
+        var existingUser = await userRepository.GetUserByIdAsync(id);
+        
+        if (existingUser == null)
+        {
+            throw new InvalidOperationException($"User with ID {id} not found.");
+        }
+        
+        // Validate request
+        ValidateCreateUserRequest(request);
+        
+        // Update user properties
+        existingUser.FirstName = request.FirstName;
+        existingUser.LastName = request.LastName;
+        existingUser.Email = request.Email;
+        
+        // Update address if provided
+        if (request.Address != null)
+        {
+            existingUser.Address = request.Address;
+        }
+        
+        // Update employments if provided
+        if (request.Employments != null && request.Employments.Count > 0)
+        {
+            existingUser.Employments = request.Employments;
+        }
+        
+        // Save to repository
+        return await userRepository.UpdateUserAsync(existingUser);
+    }
 
     private static void ValidateCreateUserRequest(User request)
     {
