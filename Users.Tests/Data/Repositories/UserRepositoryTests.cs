@@ -166,4 +166,14 @@ public class UserRepositoryTests
         result.LastName.ShouldBe("Taruc");
         result.Email.ShouldBe("allan.b.taruc@gmail.com");
     }
+    
+    [Test]
+    public async Task GetUserByIdAsync_WithNonExistingUser_ShouldReturnNull()
+    {
+        // Act
+        var result = await _userRepository.GetUserByIdAsync(0);
+
+        // Assert
+        result.ShouldBeNull();
+    }
 } 
