@@ -215,15 +215,13 @@ var assemblies = [
     "classes": [
       { "name": "Program", "rp": "Users.Api_Program.html", "cl": 0, "ucl": 21, "cal": 21, "tl": 43, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Users.Api.Controllers.UsersController", "rp": "Users.Api_UsersController.html", "cl": 39, "ucl": 0, "cal": 39, "tl": 70, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Users.Api.Controllers.WeatherForecastController", "rp": "Users.Api_WeatherForecastController.html", "cl": 0, "ucl": 17, "cal": 17, "tl": 32, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Users.Api.Data.AppDbContext", "rp": "Users.Api_AppDbContext.html", "cl": 47, "ucl": 0, "cal": 47, "tl": 72, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Users.Api.Data.DbInitializer", "rp": "Users.Api_DbInitializer.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Data.DbInitializer", "rp": "Users.Api_DbInitializer.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Users.Api.Data.Repositories.UserRepository", "rp": "Users.Api_UserRepository.html", "cl": 48, "ucl": 0, "cal": 48, "tl": 79, "cb": 22, "tb": 22, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Users.Api.Models.Address", "rp": "Users.Api_Address.html", "cl": 3, "ucl": 2, "cal": 5, "tl": 10, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Users.Api.Models.Employment", "rp": "Users.Api_Employment.html", "cl": 5, "ucl": 2, "cal": 7, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Models.Address", "rp": "Users.Api_Address.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 10, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Models.Employment", "rp": "Users.Api_Employment.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Users.Api.Models.User", "rp": "Users.Api_User.html", "cl": 10, "ucl": 0, "cal": 10, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Users.Api.Services.UserService", "rp": "Users.Api_UserService.html", "cl": 56, "ucl": 16, "cal": 72, "tl": 120, "cb": 23, "tb": 32, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Users.Api.WeatherForecast", "rp": "Users.Api_WeatherForecast.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Services.UserService", "rp": "Users.Api_UserService.html", "cl": 68, "ucl": 4, "cal": 72, "tl": 120, "cb": 29, "tb": 32, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
 ];
 
@@ -240,7 +238,7 @@ var riskHotspots = [
   {
     "assembly": "Users.Api", "class": "Users.Api.Services.UserService", "reportPath": "Users.Api_UserService.html", "methodName": "ValidateCreateUserRequest(Users.Api.Models.User)", "methodShortName": "ValidateCreateUserRequest(...)", "fileIndex": 0, "line": 68,
     "metrics": [
-      { "value": 68, "exceeded": true },
+      { "value": 23, "exceeded": false },
       { "value": 22, "exceeded": true },
     ]},
 ];
