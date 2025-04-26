@@ -44,4 +44,27 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
             return NotFound($"User with ID {id} not found.");
         }
     }
+    
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<User>> UpdateUser(int id, User user)
+    {
+        try
+        {
+            var updatedUser = await userService.UpdateUserAsync(id, user);
+            return Ok(updatedUser);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating user");
+            return StatusCode(500, "An error occurred while updating the user.");
+        }
+    }
 } 

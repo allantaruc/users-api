@@ -211,4 +211,155 @@ public class UsersControllerTests
         
         _mockUserService.Verify(service => service.GetUserByIdAsync(userId), Times.Once);
     }
+
+    [Test]
+    public async Task UpdateUser_WithValidData_ShouldReturnOk()
+    {
+        // Arrange
+        const int userId = 1;
+        var updateRequest = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com",
+            Address = new Address
+            {
+                Street = "New Street",
+                City = "New City",
+                PostCode = 2000
+            }
+        };
+
+        var updatedUser = new User
+        {
+            Id = userId,
+            FirstName = updateRequest.FirstName,
+            LastName = updateRequest.LastName,
+            Email = updateRequest.Email,
+            Address = updateRequest.Address
+        };
+
+        _mockUserService.Setup(service => service.UpdateUserAsync(userId, updateRequest))
+            .ReturnsAsync(updatedUser);
+
+        // Act
+        var result = await _controller.UpdateUser(userId, updateRequest);
+
+        // Assert
+        result.ShouldNotBeNull();
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnValue = okResult.Value.ShouldBeOfType<User>();
+        returnValue.Id.ShouldBe(userId);
+        returnValue.FirstName.ShouldBe("Allan");
+        returnValue.LastName.ShouldBe("Taruc");
+        returnValue.Email.ShouldBe("allan.b.taruc@gmail.com");
+        returnValue.Address.ShouldNotBeNull();
+        
+        _mockUserService.Verify(service => service.UpdateUserAsync(userId, updateRequest), Times.Once);
+    }
+
+    [Test]
+    public async Task UpdateUser_WithValidationError_ShouldReturnBadRequest()
+    {
+        // Arrange
+        const int userId = 1;
+        var updateRequest = new User
+        {
+            FirstName = "", // Invalid: empty first name
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com"
+        };
+
+        _mockUserService.Setup(service => service.UpdateUserAsync(userId, updateRequest))
+            .ThrowsAsync(new ArgumentException("FirstName is required."));
+
+        // Act
+        var result = await _controller.UpdateUser(userId, updateRequest);
+
+        // Assert
+        result.ShouldNotBeNull();
+        var badRequestResult = result.Result.ShouldBeOfType<BadRequestObjectResult>();
+        badRequestResult.Value.ShouldBe("FirstName is required.");
+        
+        _mockUserService.Verify(service => service.UpdateUserAsync(userId, updateRequest), Times.Once);
+    }
+
+    [Test]
+    public async Task UpdateUser_WithNonExistingUser_ShouldReturnNotFound()
+    {
+        // Arrange
+        const int userId = 999; // Non-existing user ID
+        var updateRequest = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com"
+        };
+
+        _mockUserService.Setup(service => service.UpdateUserAsync(userId, updateRequest))
+            .ThrowsAsync(new InvalidOperationException($"User with ID {userId} not found."));
+
+        // Act
+        var result = await _controller.UpdateUser(userId, updateRequest);
+
+        // Assert
+        result.ShouldNotBeNull();
+        var notFoundResult = result.Result.ShouldBeOfType<NotFoundObjectResult>();
+        notFoundResult.Value.ShouldBe($"User with ID {userId} not found.");
+        
+        _mockUserService.Verify(service => service.UpdateUserAsync(userId, updateRequest), Times.Once);
+    }
+
+    [Test]
+    public async Task UpdateUser_WithDuplicateEmail_ShouldReturnConflict()
+    {
+        // Arrange
+        const int userId = 1;
+        var updateRequest = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "duplicate@example.com" // Already used by another user
+        };
+
+        _mockUserService.Setup(service => service.UpdateUserAsync(userId, updateRequest))
+            .ThrowsAsync(new InvalidOperationException("Another user with email 'duplicate@example.com' already exists."));
+
+        // Act
+        var result = await _controller.UpdateUser(userId, updateRequest);
+
+        // Assert
+        result.ShouldNotBeNull();
+        var notFoundResult = result.Result.ShouldBeOfType<NotFoundObjectResult>();
+        notFoundResult.Value.ShouldBe("Another user with email 'duplicate@example.com' already exists.");
+        
+        _mockUserService.Verify(service => service.UpdateUserAsync(userId, updateRequest), Times.Once);
+    }
+
+    [Test]
+    public async Task UpdateUser_WithUnexpectedException_ShouldReturnStatusCode500()
+    {
+        // Arrange
+        const int userId = 1;
+        var updateRequest = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com"
+        };
+
+        _mockUserService.Setup(service => service.UpdateUserAsync(userId, updateRequest))
+            .ThrowsAsync(new Exception("Unexpected database error"));
+
+        // Act
+        var result = await _controller.UpdateUser(userId, updateRequest);
+
+        // Assert
+        result.ShouldNotBeNull();
+        var statusCodeResult = result.Result.ShouldBeOfType<ObjectResult>();
+        statusCodeResult.StatusCode.ShouldBe(500);
+        statusCodeResult.Value.ShouldBe("An error occurred while updating the user.");
+        
+        _mockUserService.Verify(service => service.UpdateUserAsync(userId, updateRequest), Times.Once);
+    }
 } 
