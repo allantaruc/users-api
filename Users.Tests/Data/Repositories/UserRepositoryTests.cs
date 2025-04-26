@@ -168,13 +168,11 @@ public class UserRepositoryTests
     }
     
     [Test]
-    public async Task GetUserByIdAsync_WithNonExistingUser_ShouldReturnNull()
+    public async Task GetUserByIdAsync_WithNonExistingUser_ShouldThrowException()
     {
-        // Act
-        var result = await _userRepository.GetUserByIdAsync(0);
-
-        // Assert
-        result.ShouldBeNull();
+        // Act & Assert
+        var exception = await Should.ThrowAsync<InvalidOperationException>(
+            async () => await _userRepository.GetUserByIdAsync(0));
     }
     
     [Test]
@@ -260,6 +258,72 @@ public class UserRepositoryTests
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _userRepository.CreateUserAsync(user));
+        
+        exception.Message.ShouldContain("end date");
+        exception.Message.ShouldContain("must be after start date");
+    }
+    
+    [Test]
+    public async Task UpdateUserAsync_WithDuplicateEmail_ShouldThrowException()
+    {
+        // Arrange
+        var user1 = new User
+        {
+            FirstName = "First",
+            LastName = "User",
+            Email = "first@example.com"
+        };
+        
+        var user2 = new User
+        {
+            FirstName = "Second",
+            LastName = "User",
+            Email = "second@example.com"
+        };
+        
+        await _dbContext.Users.AddRangeAsync(user1, user2);
+        await _dbContext.SaveChangesAsync();
+        
+        // Try to update user2 with user1's email
+        user2.Email = "first@example.com";
+        
+        // Act & Assert
+        var exception = await Should.ThrowAsync<InvalidOperationException>(
+            async () => await _userRepository.UpdateUserAsync(user2));
+        
+        exception.Message.ShouldContain("already exists");
+    }
+    
+    [Test]
+    public async Task UpdateUserAsync_WithInvalidEmploymentDates_ShouldThrowException()
+    {
+        // Arrange
+        var user = new User
+        {
+            FirstName = "Test",
+            LastName = "User",
+            Email = "test@example.com",
+            Employments =
+            [
+                new Employment
+                {
+                    Company = "Good Corp",
+                    MonthsOfExperience = 12,
+                    Salary = 50000,
+                    StartDate = new DateTime(2022, 1, 15)
+                }
+            ]
+        };
+        
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+        
+        // Now update with invalid dates
+        user.Employments[0].EndDate = new DateTime(2021, 1, 15); // End date before start date
+        
+        // Act & Assert
+        var exception = await Should.ThrowAsync<ArgumentException>(
+            async () => await _userRepository.UpdateUserAsync(user));
         
         exception.Message.ShouldContain("end date");
         exception.Message.ShouldContain("must be after start date");
