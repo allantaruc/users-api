@@ -244,9 +244,9 @@ public class UserRepositoryTests
             FirstName = "Test",
             LastName = "User",
             Email = "test@example.com",
-            Employments = new List<Employment>
-            {
-                new()
+            Employments =
+            [
+                new Employment()
                 {
                     Company = "Very Bad Corp",
                     MonthsOfExperience = 12,
@@ -254,7 +254,7 @@ public class UserRepositoryTests
                     StartDate = new DateTime(2022, 5, 15),
                     EndDate = new DateTime(2022, 1, 15) // End date before start date (invalid)
                 }
-            }
+            ]
         };
         
         // Act & Assert
