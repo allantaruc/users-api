@@ -1,5 +1,4 @@
 using Moq;
-using NUnit.Framework;
 using Shouldly;
 using Users.Api.Data.Repositories;
 using Users.Api.Models;
