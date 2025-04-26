@@ -204,4 +204,64 @@ public class UserRepositoryTests
         
         exception.Message.ShouldContain("already exists");
     }
+    
+    [Test]
+    public async Task CreateUserAsync_WithInvalidEmploymentDates_ShouldThrowException()
+    {
+        // Arrange
+        var user = new User
+        {
+            FirstName = "Test",
+            LastName = "User",
+            Email = "test@example.com",
+            Employments =
+            [
+                new Employment
+                {
+                    Company = "Invalid Dates Corp",
+                    MonthsOfExperience = 12,
+                    Salary = 50000,
+                    StartDate = new DateTime(2022, 1, 15),
+                    EndDate = new DateTime(2022, 1, 15) // End date same as start date (invalid)
+                }
+            ]
+        };
+        
+        // Act & Assert
+        var exception = await Should.ThrowAsync<ArgumentException>(
+            async () => await _userRepository.CreateUserAsync(user));
+        
+        exception.Message.ShouldContain("end date");
+        exception.Message.ShouldContain("must be after start date");
+    }
+    
+    [Test]
+    public async Task CreateUserAsync_WithEndDateBeforeStartDate_ShouldThrowException()
+    {
+        // Arrange
+        var user = new User
+        {
+            FirstName = "Test",
+            LastName = "User",
+            Email = "test@example.com",
+            Employments = new List<Employment>
+            {
+                new()
+                {
+                    Company = "Very Bad Corp",
+                    MonthsOfExperience = 12,
+                    Salary = 50000,
+                    StartDate = new DateTime(2022, 5, 15),
+                    EndDate = new DateTime(2022, 1, 15) // End date before start date (invalid)
+                }
+            }
+        };
+        
+        // Act & Assert
+        var exception = await Should.ThrowAsync<ArgumentException>(
+            async () => await _userRepository.CreateUserAsync(user));
+        
+        exception.Message.ShouldContain("end date");
+        exception.Message.ShouldContain("must be after start date");
+    }
 } 

@@ -13,6 +13,20 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         {
             throw new InvalidOperationException($"A user with email '{user.Email}' already exists.");
         }
+        
+        // Validate employment dates
+        if (user.Employments.Count != 0)
+        {
+            foreach (var employment in user.Employments)
+            {
+                if (employment is { EndDate: not null, StartDate: not null } && 
+                    employment.EndDate.Value <= employment.StartDate.Value)
+                {
+                    throw new ArgumentException(
+                        $"Employment end date ({employment.EndDate}) must be after start date ({employment.StartDate}) for company '{employment.Company}'.");
+                }
+            }
+        }
 
         await dbContext.Users.AddAsync(user);
         await dbContext.SaveChangesAsync();
