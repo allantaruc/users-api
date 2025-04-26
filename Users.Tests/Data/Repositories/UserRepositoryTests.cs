@@ -142,4 +142,28 @@ public class UserRepositoryTests
         xyzEmployment.StartDate.ShouldBe(new DateTime(2020, 5, 1));
         xyzEmployment.EndDate.ShouldBe(new DateTime(2021, 5, 1));
     }
+    
+    [Test]
+    public async Task GetUserByIdAsync_WithExistingUser_ShouldReturnUser()
+    {
+        // Arrange
+        var user = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com"
+        };
+        
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await _userRepository.GetUserByIdAsync(1);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result!.FirstName.ShouldBe("Allan");
+        result.LastName.ShouldBe("Taruc");
+        result.Email.ShouldBe("allan.b.taruc@gmail.com");
+    }
 } 
