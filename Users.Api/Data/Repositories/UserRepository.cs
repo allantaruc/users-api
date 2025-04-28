@@ -70,9 +70,10 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
             query = query.Where(u => u.Id != user.Id);
         }
         
-        var existingUser = await query.FirstOrDefaultAsync();
+        // Just check if any matching users exist without loading them
+        bool emailExists = await query.AnyAsync();
         
-        if (existingUser != null)
+        if (emailExists)
         {
             throw new InvalidOperationException(
                 isUpdate
