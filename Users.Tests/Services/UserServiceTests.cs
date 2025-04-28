@@ -946,4 +946,128 @@ public class UserServiceTests
         _mockUserRepository.Verify(repo => repo.UpdateUserAsync(It.Is<User>(u => 
             u.Employments == existingUser.Employments)), Times.Once);
     }
+
+    [Test]
+    public async Task GetAllUsersAsync_ShouldReturnAllUsers()
+    {
+        // Arrange
+        var users = new List<User>
+        {
+            new()
+            {
+                Id = 1,
+                FirstName = "Allan",
+                LastName = "Taruc",
+                Email = "allan@example.com"
+            },
+            new()
+            {
+                Id = 2,
+                FirstName = "Jane",
+                LastName = "Smith",
+                Email = "jane@example.com"
+            }
+        };
+
+        _mockUserRepository.Setup(repo => repo.GetAllUsersAsync())
+            .ReturnsAsync(users);
+
+        // Act
+        var result = await _userService.GetAllUsersAsync();
+
+        // Assert
+        var usersList = result.ToList();
+        usersList.ShouldNotBeNull();
+        usersList.Count.ShouldBe(2);
+        usersList.ShouldContain(u => u.Email == "allan@example.com");
+        usersList.ShouldContain(u => u.Email == "jane@example.com");
+        
+        _mockUserRepository.Verify(repo => repo.GetAllUsersAsync(), Times.Once);
+    }
+    
+    [Test]
+    public async Task GetAllUsersAsync_WhenNoUsers_ShouldReturnEmptyList()
+    {
+        // Arrange
+        _mockUserRepository.Setup(repo => repo.GetAllUsersAsync())
+            .ReturnsAsync(new List<User>());
+
+        // Act
+        var result = await _userService.GetAllUsersAsync();
+
+        // Assert
+        var usersList = result.ToList();
+        usersList.ShouldNotBeNull();
+        usersList.Count.ShouldBe(0);
+        
+        _mockUserRepository.Verify(repo => repo.GetAllUsersAsync(), Times.Once);
+    }
+    
+    [Test]
+    public async Task GetAllUsersAsync_WithRepositoryError_ShouldPropagateException()
+    {
+        // Arrange
+        _mockUserRepository.Setup(repo => repo.GetAllUsersAsync())
+            .ThrowsAsync(new Exception("Database connection error"));
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<Exception>(
+            async () => await _userService.GetAllUsersAsync());
+        
+        exception.Message.ShouldContain("Database connection error");
+        
+        _mockUserRepository.Verify(repo => repo.GetAllUsersAsync(), Times.Once);
+    }
+    
+    [Test]
+    public async Task DeleteUserAsync_WithExistingUser_ShouldDeleteUser()
+    {
+        // Arrange
+        const int userId = 1;
+        
+        _mockUserRepository.Setup(repo => repo.DeleteUserAsync(userId))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _userService.DeleteUserAsync(userId);
+
+        // Assert
+        _mockUserRepository.Verify(repo => repo.DeleteUserAsync(userId), Times.Once);
+    }
+    
+    [Test]
+    public async Task DeleteUserAsync_WithNonExistingUser_ShouldPropagateException()
+    {
+        // Arrange
+        const int userId = 999;
+        
+        _mockUserRepository.Setup(repo => repo.DeleteUserAsync(userId))
+            .ThrowsAsync(new InvalidOperationException($"User with ID {userId} not found."));
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<InvalidOperationException>(
+            async () => await _userService.DeleteUserAsync(userId));
+        
+        exception.Message.ShouldContain("not found");
+        
+        _mockUserRepository.Verify(repo => repo.DeleteUserAsync(userId), Times.Once);
+    }
+    
+    [Test]
+    public async Task DeleteUserAsync_WithRepositoryError_ShouldPropagateException()
+    {
+        // Arrange
+        const int userId = 1;
+        
+        _mockUserRepository.Setup(repo => repo.DeleteUserAsync(userId))
+            .ThrowsAsync(new Exception("Database connection error"));
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<Exception>(
+            async () => await _userService.DeleteUserAsync(userId));
+        
+        exception.Message.ShouldContain("Database connection error");
+        
+        _mockUserRepository.Verify(repo => repo.DeleteUserAsync(userId), Times.Once);
+    }
 } 

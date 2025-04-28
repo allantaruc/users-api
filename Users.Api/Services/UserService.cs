@@ -16,7 +16,7 @@ public class UserService(IUserRepository userRepository) : IUserService
             LastName = request.LastName,
             Email = request.Email,
             Address = request.Address,
-            Employments = request.Employments ?? []
+            Employments = request.Employments
         };
 
         // Save to repository
@@ -28,6 +28,16 @@ public class UserService(IUserRepository userRepository) : IUserService
         var user = await userRepository.GetUserByIdAsync(id) ?? 
                    throw new InvalidOperationException($"User with ID {id} not found.");
         return user;
+    }
+
+    public async Task<IEnumerable<User>> GetAllUsersAsync()
+    {
+        return await userRepository.GetAllUsersAsync();
+    }
+
+    public async Task DeleteUserAsync(int id)
+    {
+        await userRepository.DeleteUserAsync(id);
     }
 
     public async Task<User> UpdateUserAsync(int id, User request)
