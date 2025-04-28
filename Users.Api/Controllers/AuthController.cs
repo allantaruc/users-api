@@ -28,13 +28,9 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
             return BadRequest(ModelState);
 
         var result = await authService.RegisterAsync(request);
-        if (result == null)
-        {
-            logger?.LogError("Register failed");
-            return BadRequest("Registration failed. Email may already be in use or passwords don't match.");
-
-        }
-        return Ok(result);
+        if (result != null) return Ok(result);
+        logger?.LogError("Register failed");
+        return BadRequest("Registration failed. Email may already be in use or passwords don't match.");
     }
 
     /// <summary>
@@ -51,13 +47,10 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
             return BadRequest(ModelState);
 
         var result = await authService.LoginAsync(request);
-        if (result == null)
-        {
-            logger?.LogError("Login failed");
-            return Unauthorized("Invalid email or password.");
-        }
+        if (result != null) return Ok(result);
+        logger?.LogError("Login failed");
+        return Unauthorized("Invalid email or password.");
 
-        return Ok(result);
     }
 
     /// <summary>
@@ -69,17 +62,14 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult ValidateToken()
     {
-        var authHeader = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+        var authHeader = HttpContext.Request.Headers.Authorization.FirstOrDefault();
         if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
             return Unauthorized("No valid authorization header found");
 
-        string token = authHeader.Substring("Bearer ".Length).Trim();
-        if (!authService.ValidateToken(token))
-        {
-            logger?.LogError("Invalid token");
-            return Unauthorized("Invalid token");
-        }
+        var token = authHeader.Substring("Bearer ".Length).Trim();
+        if (authService.ValidateToken(token)) return Ok(new { Valid = true });
+        logger?.LogError("Invalid token");
+        return Unauthorized("Invalid token");
 
-        return Ok(new { Valid = true });
     }
 } 

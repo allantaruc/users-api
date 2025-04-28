@@ -185,9 +185,9 @@ public class AuthControllerTests
     public void ValidateToken_WhenTokenIsValid_ShouldReturnOk()
     {
         // Arrange
-        var token = "valid-jwt-token";
+        const string token = "valid-jwt-token";
         var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers["Authorization"] = $"Bearer {token}";
+        httpContext.Request.Headers.Authorization = $"Bearer {token}";
         _controller.ControllerContext = new ControllerContext
         {
             HttpContext = httpContext
@@ -230,7 +230,7 @@ public class AuthControllerTests
     {
         // Arrange
         var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers["Authorization"] = "Basic dXNlcjpwYXNzd29yZA==";
+        httpContext.Request.Headers.Authorization = "Basic dXNlcjpwYXNzd29yZA==";
         _controller.ControllerContext = new ControllerContext
         {
             HttpContext = httpContext
@@ -247,7 +247,7 @@ public class AuthControllerTests
     public void ValidateToken_WhenTokenIsInvalid_ShouldReturnUnauthorized()
     {
         // Arrange
-        var token = "invalid-jwt-token";
+        const string token = "invalid-jwt-token";
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Headers["Authorization"] = $"Bearer {token}";
         _controller.ControllerContext = new ControllerContext
