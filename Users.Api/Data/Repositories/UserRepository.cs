@@ -24,6 +24,26 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
             .FirstOrDefaultAsync(u => u.Id == id) ?? null) ?? throw new InvalidOperationException();
     }
     
+    public async Task<IEnumerable<User>> GetAllUsersAsync()
+    {
+        return await dbContext.Users
+            .Include(u => u.Address)
+            .Include(u => u.Employments)
+            .ToListAsync();
+    }
+    
+    public async Task DeleteUserAsync(int id)
+    {
+        var user = await dbContext.Users.FindAsync(id);
+        if (user == null)
+        {
+            throw new InvalidOperationException($"User with ID {id} not found.");
+        }
+        
+        dbContext.Users.Remove(user);
+        await dbContext.SaveChangesAsync();
+    }
+    
     public async Task<User> UpdateUserAsync(User user)
     {
         // Validate email uniqueness (excluding current user)
