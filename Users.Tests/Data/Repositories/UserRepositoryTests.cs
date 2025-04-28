@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
 using Shouldly;
 using Users.Api.Data;
 using Users.Api.Data.Repositories;
@@ -84,8 +83,8 @@ public class UserRepositoryTests
             FirstName = "Allan",
             LastName = "Taruc",
             Email = "allan.b.taruc@gmail.com",
-            Employments = new List<Employment>
-            {
+            Employments =
+            [
                 new Employment
                 {
                     Company = "ACME Inc",
@@ -93,6 +92,7 @@ public class UserRepositoryTests
                     Salary = 75000,
                     StartDate = new DateTime(2022, 1, 15)
                 },
+
                 new Employment
                 {
                     Company = "XYZ Corp",
@@ -101,7 +101,7 @@ public class UserRepositoryTests
                     StartDate = new DateTime(2020, 5, 1),
                     EndDate = new DateTime(2021, 5, 1)
                 }
-            }
+            ]
         };
 
         // Act
@@ -126,7 +126,7 @@ public class UserRepositoryTests
         
         var acmeEmployment = savedUser.Employments.FirstOrDefault(e => e.Company == "ACME Inc");
         acmeEmployment.ShouldNotBeNull();
-        acmeEmployment!.MonthsOfExperience.HasValue.ShouldBeTrue();
+        acmeEmployment.MonthsOfExperience.HasValue.ShouldBeTrue();
         acmeEmployment.MonthsOfExperience!.Value.ShouldBe(24U);
         acmeEmployment.Salary.HasValue.ShouldBeTrue();
         acmeEmployment.Salary!.Value.ShouldBe(75000U);
@@ -135,7 +135,7 @@ public class UserRepositoryTests
         
         var xyzEmployment = savedUser.Employments.FirstOrDefault(e => e.Company == "XYZ Corp");
         xyzEmployment.ShouldNotBeNull();
-        xyzEmployment!.MonthsOfExperience.HasValue.ShouldBeTrue();
+        xyzEmployment.MonthsOfExperience.HasValue.ShouldBeTrue();
         xyzEmployment.MonthsOfExperience!.Value.ShouldBe(12U);
         xyzEmployment.Salary.HasValue.ShouldBeTrue();
         xyzEmployment.Salary!.Value.ShouldBe(65000U);
@@ -162,7 +162,7 @@ public class UserRepositoryTests
 
         // Assert
         result.ShouldNotBeNull();
-        result!.FirstName.ShouldBe("Allan");
+        result.FirstName.ShouldBe("Allan");
         result.LastName.ShouldBe("Taruc");
         result.Email.ShouldBe("allan.b.taruc@gmail.com");
     }
@@ -171,7 +171,7 @@ public class UserRepositoryTests
     public async Task GetUserByIdAsync_WithNonExistingUser_ShouldThrowException()
     {
         // Act & Assert
-        var exception = await Should.ThrowAsync<InvalidOperationException>(
+        await Should.ThrowAsync<InvalidOperationException>(
             async () => await _userRepository.GetUserByIdAsync(0));
     }
     
@@ -455,5 +455,139 @@ public class UserRepositoryTests
         updatedUser.Employments.Count.ShouldBe(2);
         updatedUser.Employments.Any(e => e.Company == "Updated Company").ShouldBeTrue();
         updatedUser.Employments.Any(e => e.Company == "New Company").ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task GetAllUsersAsync_ShouldReturnAllUsers()
+    {
+        // Arrange
+        var user1 = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan@example.com",
+            Address = new Address
+            {
+                Street = "Street 1",
+                City = "City 1",
+                PostCode = 1000
+            }
+        };
+        
+        var user2 = new User
+        {
+            FirstName = "Jane",
+            LastName = "Smith",
+            Email = "jane@example.com",
+            Address = new Address
+            {
+                Street = "Street 2",
+                City = "City 2",
+                PostCode = 2000
+            }
+        };
+        
+        var user3 = new User
+        {
+            FirstName = "Bob",
+            LastName = "Johnson",
+            Email = "bob@example.com",
+            Employments =
+            [
+                new Employment
+                {
+                    Company = "Test Company",
+                    MonthsOfExperience = 12,
+                    Salary = 50000,
+                    StartDate = new DateTime(2020, 1, 1)
+                }
+            ]
+        };
+        
+        await _dbContext.Users.AddRangeAsync(user1, user2, user3);
+        await _dbContext.SaveChangesAsync();
+        
+        // Act
+        var result = await _userRepository.GetAllUsersAsync();
+        
+        // Assert
+        var users = result.ToList();
+        users.ShouldNotBeNull();
+        users.Count.ShouldBe(3);
+        
+        users.ShouldContain(u => u.Email == "allan@example.com");
+        users.ShouldContain(u => u.Email == "jane@example.com");
+        users.ShouldContain(u => u.Email == "bob@example.com");
+        
+        // Verify that related entities are included
+        var allanUser = users.First(u => u.Email == "allan@example.com");
+        allanUser.Address.ShouldNotBeNull();
+        allanUser.Address!.City.ShouldBe("City 1");
+        
+        var bobUser = users.First(u => u.Email == "bob@example.com");
+        bobUser.Employments.ShouldNotBeNull();
+        bobUser.Employments.Count.ShouldBe(1);
+        bobUser.Employments[0].Company.ShouldBe("Test Company");
+    }
+    
+    [Test]
+    public async Task DeleteUserAsync_WithExistingUser_ShouldDeleteUser()
+    {
+        // Arrange
+        var user = new User
+        {
+            FirstName = "ToDelete",
+            LastName = "User",
+            Email = "delete@example.com",
+            Address = new Address
+            {
+                Street = "Delete Street",
+                City = "Delete City",
+                PostCode = 9999
+            },
+            Employments =
+            [
+                new Employment
+                {
+                    Company = "Delete Company",
+                    MonthsOfExperience = 10,
+                    Salary = 40000,
+                    StartDate = new DateTime(2020, 1, 1)
+                }
+            ]
+        };
+        
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+        
+        var userId = user.Id;
+        
+        // Verify user exists before deletion
+        var userBeforeDeletion = await _dbContext.Users.FindAsync(userId);
+        userBeforeDeletion.ShouldNotBeNull();
+        
+        // Act
+        await _userRepository.DeleteUserAsync(userId);
+        
+        // Assert
+        var userAfterDeletion = await _dbContext.Users.FindAsync(userId);
+        userAfterDeletion.ShouldBeNull();
+        
+        // Verify that related entities are also deleted (cascade delete)
+        var addressAfterDeletion = await _dbContext.Addresses.FirstOrDefaultAsync(a => a.Street == "Delete Street");
+        addressAfterDeletion.ShouldBeNull();
+        
+        var employmentAfterDeletion = await _dbContext.Employments.FirstOrDefaultAsync(e => e.Company == "Delete Company");
+        employmentAfterDeletion.ShouldBeNull();
+    }
+    
+    [Test]
+    public async Task DeleteUserAsync_WithNonExistingUser_ShouldThrowException()
+    {
+        // Act & Assert
+        var exception = await Should.ThrowAsync<InvalidOperationException>(
+            async () => await _userRepository.DeleteUserAsync(999));
+        
+        exception.Message.ShouldContain("not found");
     }
 } 

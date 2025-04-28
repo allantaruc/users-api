@@ -1,12 +1,52 @@
 @address = https://localhost:3000
 
-### GET User by ID
+//replace with generated token
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ0ZXN0LnVzZXJAZXhhbXBsZS5jb20iLCJnaXZlbl9uYW1lIjoiVGVzdCIsImZhbWlseV9uYW1lIjoiVXNlciIsImp0aSI6ImNjZDUxZmRjLWY5NjgtNDA0MC1iNGQyLThlYzVlNGM5ZWU3MSIsIm5iZiI6MTc0NTgwMjQ1OCwiZXhwIjoxNzQ1ODg4ODU4LCJpYXQiOjE3NDU4MDI0NTgsImlzcyI6IlVzZXJzQXBpIiwiYXVkIjoiVXNlcnNBcGlDbGllbnRzIn0.-Tvrvdw-UuHLO3Egi0RWjxvQCL_GeKmeP24tYEO_C9s
+
+### AUTH FLOW ###
+
+### Register a new user 
+# @name register
+POST {{address}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "test.user@example.com",
+  "password": "SecureP@ssw0rd123",
+  "confirmPassword": "SecureP@ssw0rd123"
+}
+
+### Login with the registered user
+# @name login
+POST {{address}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test.user@example.com",
+  "password": "SecureP@ssw0rd123"
+}
+
+### Validate token
+GET {{address}}/api/auth/validate
+Authorization: Bearer {{token}}
+
+### API ENDPOINTS ###
+
+### GET All Users (public endpoint - no auth required)
+GET {{address}}/api/users
+Accept: application/json
+
+### GET User by ID (protected - requires auth)
 GET {{address}}/api/users/1
 Accept: application/json
+Authorization: Bearer {{token}}
 
 ### POST - Create a new user (valid data)
 POST {{address}}/api/users
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "firstName": "Allan",
@@ -30,6 +70,7 @@ Content-Type: application/json
 ### POST - Create a user (duplicate email validation)
 POST {{address}}/api/users
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "firstName": "Jane",
@@ -45,6 +86,7 @@ Content-Type: application/json
 ### POST - Create a user (employment date validation)
 POST {{address}}/api/users
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "firstName": "Bob",
@@ -64,6 +106,7 @@ Content-Type: application/json
 ### PUT - Update user (valid data)
 PUT {{address}}/api/users/1
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "firstName": "Allan B",
@@ -87,6 +130,7 @@ Content-Type: application/json
 ### PUT - Update user (address changes only)
 PUT {{address}}/api/users/1
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "firstName": "Allan B",
@@ -102,6 +146,7 @@ Content-Type: application/json
 ### PUT - Update user (employment changes only)
 PUT {{address}}/api/users/1
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "firstName": "Allan B",
@@ -128,6 +173,7 @@ Content-Type: application/json
 ### PUT - Update user (invalid employment dates)
 PUT {{address}}/api/users/1
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "firstName": "Allan B",
@@ -147,11 +193,12 @@ Content-Type: application/json
 ### POST - Create another user (valid data)
 POST {{address}}/api/users
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "firstName": "Jane",
   "lastName": "Smith",
-  "email": "jane.smithc@email.com",
+  "email": "jane.smith@email.com",
   "address": {
     "street": "Paltoc",
     "city": "Manila",
@@ -170,11 +217,16 @@ Content-Type: application/json
 ### PUT - Update user (duplicate email)
 PUT {{address}}/api/users/2
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "firstName": "Jane",
   "lastName": "Smith",
   "email": "allan.taruc@gmail.com"
 }
+
+### DELETE - Delete a user
+DELETE {{address}}/api/users/1
+Authorization: Bearer {{token}}
 
 ###

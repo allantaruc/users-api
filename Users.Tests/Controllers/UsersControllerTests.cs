@@ -389,8 +389,8 @@ public class UsersControllerTests
             LastName = updateRequest.LastName,
             Email = updateRequest.Email,
             Address = updateRequest.Address,
-            Employments = new List<Employment>
-            {
+            Employments =
+            [
                 new Employment
                 {
                     Company = "Existing Company", // This should remain unchanged
@@ -398,7 +398,7 @@ public class UsersControllerTests
                     Salary = 75000,
                     StartDate = new DateTime(2022, 1, 15)
                 }
-            }
+            ]
         };
 
         _mockUserService.Setup(service => service.UpdateUserAsync(userId, updateRequest))
@@ -436,8 +436,8 @@ public class UsersControllerTests
             FirstName = "Allan", // Required fields
             LastName = "Taruc",
             Email = "allan.b.taruc@gmail.com",
-            Employments = new List<Employment>
-            {
+            Employments =
+            [
                 new Employment
                 {
                     Company = "New Company",
@@ -445,6 +445,7 @@ public class UsersControllerTests
                     Salary = 90000,
                     StartDate = new DateTime(2022, 1, 1)
                 },
+
                 new Employment
                 {
                     Company = "Second Company",
@@ -453,7 +454,7 @@ public class UsersControllerTests
                     StartDate = new DateTime(2020, 1, 1),
                     EndDate = new DateTime(2021, 12, 31)
                 }
-            }
+            ]
         };
 
         var updatedUser = new User
@@ -507,5 +508,139 @@ public class UsersControllerTests
         secondEmployment.EndDate!.Value.ShouldBe(new DateTime(2021, 12, 31));
         
         _mockUserService.Verify(service => service.UpdateUserAsync(userId, updateRequest), Times.Once);
+    }
+
+    [Test]
+    public async Task GetAllUsers_ShouldReturnOkWithUsers()
+    {
+        // Arrange
+        var users = new List<User>
+        {
+            new()
+            {
+                Id = 1,
+                FirstName = "Allan",
+                LastName = "Taruc",
+                Email = "allan@example.com"
+            },
+            new()
+            {
+                Id = 2,
+                FirstName = "Jane",
+                LastName = "Smith",
+                Email = "jane@example.com"
+            }
+        };
+
+        _mockUserService.Setup(service => service.GetAllUsersAsync())
+            .ReturnsAsync(users);
+
+        // Act
+        var result = await _controller.GetAllUsers();
+
+        // Assert
+        result.ShouldNotBeNull();
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnValue = okResult.Value.ShouldBeOfType<List<User>>();
+        returnValue.Count.ShouldBe(2);
+        returnValue.ShouldContain(u => u.Email == "allan@example.com");
+        returnValue.ShouldContain(u => u.Email == "jane@example.com");
+        
+        _mockUserService.Verify(service => service.GetAllUsersAsync(), Times.Once);
+    }
+    
+    [Test]
+    public async Task GetAllUsers_WithEmptyList_ShouldReturnOkWithEmptyList()
+    {
+        // Arrange
+        _mockUserService.Setup(service => service.GetAllUsersAsync())
+            .ReturnsAsync(new List<User>());
+
+        // Act
+        var result = await _controller.GetAllUsers();
+
+        // Assert
+        result.ShouldNotBeNull();
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnValue = okResult.Value.ShouldBeOfType<List<User>>();
+        returnValue.Count.ShouldBe(0);
+        
+        _mockUserService.Verify(service => service.GetAllUsersAsync(), Times.Once);
+    }
+    
+    [Test]
+    public async Task GetAllUsers_WithException_ShouldReturnStatusCode500()
+    {
+        // Arrange
+        _mockUserService.Setup(service => service.GetAllUsersAsync())
+            .ThrowsAsync(new Exception("Database connection error"));
+
+        // Act
+        var result = await _controller.GetAllUsers();
+
+        // Assert
+        result.ShouldNotBeNull();
+        var statusCodeResult = result.Result.ShouldBeOfType<ObjectResult>();
+        statusCodeResult.StatusCode.ShouldBe(500);
+        statusCodeResult.Value.ShouldBe("An error occurred while retrieving users.");
+        
+        _mockUserService.Verify(service => service.GetAllUsersAsync(), Times.Once);
+    }
+    
+    [Test]
+    public async Task DeleteUser_WithExistingUser_ShouldReturnNoContent()
+    {
+        // Arrange
+        const int userId = 1;
+        
+        _mockUserService.Setup(service => service.DeleteUserAsync(userId))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _controller.DeleteUser(userId);
+
+        // Assert
+        result.ShouldBeOfType<NoContentResult>();
+        
+        _mockUserService.Verify(service => service.DeleteUserAsync(userId), Times.Once);
+    }
+    
+    [Test]
+    public async Task DeleteUser_WithNonExistingUser_ShouldReturnNotFound()
+    {
+        // Arrange
+        const int userId = 999;
+        
+        _mockUserService.Setup(service => service.DeleteUserAsync(userId))
+            .ThrowsAsync(new InvalidOperationException($"User with ID {userId} not found."));
+
+        // Act
+        var result = await _controller.DeleteUser(userId);
+
+        // Assert
+        var notFoundResult = result.ShouldBeOfType<NotFoundObjectResult>();
+        notFoundResult.Value.ShouldBe($"User with ID {userId} not found.");
+        
+        _mockUserService.Verify(service => service.DeleteUserAsync(userId), Times.Once);
+    }
+    
+    [Test]
+    public async Task DeleteUser_WithUnexpectedException_ShouldReturnStatusCode500()
+    {
+        // Arrange
+        const int userId = 1;
+        
+        _mockUserService.Setup(service => service.DeleteUserAsync(userId))
+            .ThrowsAsync(new Exception("Database connection error"));
+
+        // Act
+        var result = await _controller.DeleteUser(userId);
+
+        // Assert
+        var statusCodeResult = result.ShouldBeOfType<ObjectResult>();
+        statusCodeResult.StatusCode.ShouldBe(500);
+        statusCodeResult.Value.ShouldBe("An error occurred while deleting the user.");
+        
+        _mockUserService.Verify(service => service.DeleteUserAsync(userId), Times.Once);
     }
 } 

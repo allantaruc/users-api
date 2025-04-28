@@ -32,6 +32,15 @@ public class AppDbContext : DbContext
             .WithOne()
             .HasForeignKey("UserId");
 
+        // Configure password fields
+        modelBuilder.Entity<User>()
+            .Property(u => u.PasswordHash)
+            .IsRequired(false);
+
+        modelBuilder.Entity<User>()
+            .Property(u => u.PasswordSalt)
+            .IsRequired(false);
+
         // Configure required fields
         modelBuilder.Entity<User>()
             .Property(u => u.FirstName)

@@ -22,5 +22,8 @@ COPY --from=build /app/out .
 ENV ASPNETCORE_URLS=http://+:10000
 ENV ASPNETCORE_ENVIRONMENT=Production
 
+# Note: Set JWT_SECRET_KEY at runtime using:
+# docker run -e JWT_SECRET_KEY="your_secure_key_here" ...
+
 EXPOSE 10000
 ENTRYPOINT ["dotnet", "Users.Api.dll"] 

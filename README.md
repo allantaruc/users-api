@@ -38,24 +38,66 @@ The script will:
 
 The project includes a comprehensive HTTP request file (`Users.Api.http`) that demonstrates all API endpoints and validation scenarios. This file can be used with REST Client extensions in VS Code, JetBrains Rider, or other HTTP client tools.
 
+### Authentication Flow
+
+The API implements JWT-based authentication. To access protected endpoints, you need to:
+
+1. **Register a new user**:
+   - Use the `/api/auth/register` endpoint
+   - Provide email, password, and user details
+
+2. **Login to get a token**:
+   - Use the `/api/auth/login` endpoint with email and password
+   - The response includes a JWT token
+
+3. **Use the token for authenticated requests**:
+   - Add an `Authorization: Bearer {token}` header to requests
+   - Replace `{token}` with the actual JWT token
+   
+The `Users.Api.http` file includes a variable `@token` that can be set with your JWT token to test authenticated endpoints.
+
+### Public vs Protected Endpoints
+
+- **Public endpoints** (no authentication required):
+  - `GET /api/users` - Get all users
+  - `POST /api/auth/register` - Register a new user
+  - `POST /api/auth/login` - Login and get a token
+
+- **Protected endpoints** (require authentication):
+  - `GET /api/users/{id}` - Get a specific user
+  - `POST /api/users` - Create a user
+  - `PUT /api/users/{id}` - Update a user
+  - `DELETE /api/users/{id}` - Delete a user
+  - `GET /api/auth/validate` - Validate a token
+
 ### Available Test Scenarios
 
-- **GET User by ID**: Retrieve user details by ID
-- **POST - Create a new user**: Create a user with address and employment information
-- **POST - Create a user (duplicate email validation)**: Test email uniqueness validation
-- **POST - Create a user (employment date validation)**: Test validation of employment dates
-- **PUT - Update user (valid data)**: Update all user information including address and employment
-- **PUT - Update user (address changes only)**: Test partial updates with address changes
-- **PUT - Update user (employment changes only)**: Test partial updates with employment changes
-- **PUT - Update user (invalid employment dates)**: Test validation of employment dates during update
-- **PUT - Update user (duplicate email)**: Test email uniqueness validation during update
+- **Authentication Flow**:
+  - Register a new user
+  - Login to obtain a JWT token
+  - Validate token
+  
+- **User Management**:
+  - **GET All Users**: Public endpoint to list all users
+  - **GET User by ID**: Retrieve user details by ID (authenticated)
+  - **POST - Create a new user**: Create a user with address and employment information
+  - **POST - Create a user (duplicate email validation)**: Test email uniqueness validation
+  - **POST - Create a user (employment date validation)**: Test validation of employment dates
+  - **PUT - Update user (valid data)**: Update all user information including address and employment
+  - **PUT - Update user (address changes only)**: Test partial updates with address changes
+  - **PUT - Update user (employment changes only)**: Test partial updates with employment changes
+  - **PUT - Update user (invalid employment dates)**: Test validation of employment dates during update
+  - **PUT - Update user (duplicate email)**: Test email uniqueness validation during update
+  - **DELETE - Delete a user**: Remove a user from the system
 
 ### How to Use
 
 1. Make sure your API is running at the URL specified in the `.http` file (default: `https://localhost:3000`)
 2. Open `Users.Api.http` in an editor with REST Client support
-3. Click on the "Send Request" link above each request or use your editor's command to send HTTP requests
-4. Review the responses to verify correct behavior
+3. Run the authentication requests first to get a valid token
+4. Update the `@token` variable with your JWT token if needed
+5. Run the desired API requests with authentication
+6. Review the responses to verify correct behavior
 
 These sample requests help verify that the API correctly implements all validation rules:
 - Email uniqueness across all users
@@ -78,9 +120,18 @@ The API includes Swagger/OpenAPI documentation, providing interactive exploratio
 - **Response Schemas**: Displays the structure of all response objects
 - **Model Documentation**: Describes all entities with their properties and validation rules
 
-### Authentication
+### Authentication in Swagger UI
 
-The Swagger UI allows exploration of all endpoints without authentication requirements.
+The API implements JWT authentication which is fully integrated with Swagger UI:
+
+1. Use the `/api/auth/register` endpoint to create a new account
+2. Use the `/api/auth/login` endpoint to get a JWT token
+3. Click the "Authorize" button (lock icon) at the top of the Swagger UI
+4. Enter your token in the format: `Bearer {your-token}` (include the word "Bearer" followed by a space)
+5. Click "Authorize" to apply the token to all subsequent API calls
+6. You can now test protected endpoints directly from Swagger UI
+
+Protected endpoints are marked with a lock icon in the Swagger UI. Public endpoints can be accessed without authentication.
 
 ## Deployment
 
@@ -109,6 +160,7 @@ To deploy this application on Render:
    - Add the following environment variables:
      - `ConnectionStrings__DefaultConnection`: For the database connection
      - `ASPNETCORE_ENVIRONMENT`: Set to `Production`
+     - `JWT_SECRET_KEY`: A secure random string for JWT token signing (min 32 characters)
      - Any other application-specific variables
 
 4. **Deploy**:
@@ -133,6 +185,25 @@ Logging__LogLevel__Default=Information
 The project includes GitHub Actions workflows for:
 - Continuous Integration (build and test)
 - Code Quality Analysis
+
+## Branch Protection Setup
+
+To enforce quality standards and prevent merging PRs when builds or tests fail:
+
+1. Go to repository Settings > Branches > Branch protection rules > Add rule
+2. Under "Branch name pattern" enter `main`
+3. Enable the following options:
+   - ✅ Require a pull request before merging
+   - ✅ Require status checks to pass before merging
+   - ✅ Require branches to be up to date before merging
+4. Under "Status checks that are required":
+   - Search for and select `build-and-test` (from the .NET CI workflow)
+5. Optionally, enable these additional protections:
+   - ✅ Require conversation resolution before merging
+   - ✅ Require linear history
+   - ✅ Do not allow bypassing the above settings
+
+With these settings, GitHub will prevent merging pull requests to the main branch until all the required status checks (including build and tests) pass successfully.
 
 ## Getting Started
 
