@@ -4,7 +4,7 @@ public class User
 {
     public User()
     {
-        Employments = new List<Employment>();
+        Employments = [];
     }
     public int Id { get; set; } 
     public string? FirstName { get; set; } //MANDATORY 

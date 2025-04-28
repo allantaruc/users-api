@@ -19,6 +19,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
     public async Task<User> GetUserByIdAsync(int id)
     {
         return (await dbContext.Users
+            .AsNoTracking()
             .Include(u => u.Address)
             .Include(u => u.Employments)
             .FirstOrDefaultAsync(u => u.Id == id) ?? null) ?? throw new InvalidOperationException();
@@ -27,6 +28,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
     public async Task<IEnumerable<User>> GetAllUsersAsync()
     {
         return await dbContext.Users
+            .AsNoTracking()
             .Include(u => u.Address)
             .Include(u => u.Employments)
             .ToListAsync();
