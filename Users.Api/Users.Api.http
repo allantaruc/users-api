@@ -1,7 +1,8 @@
 @address = https://users-api-jhnp.onrender.com
+#@address = https://localhost:3000
 
 //replace with generated token
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJ0ZXN0LnVzZXJAZXhhbXBsZS5jb20iLCJnaXZlbl9uYW1lIjoiVGVzdCIsImZhbWlseV9uYW1lIjoiVXNlciIsImp0aSI6ImFkNzMxOGEzLTk2ZDQtNGU1Mi1iOGQxLTk5ZjBhYjI5ODU3MSIsIm5iZiI6MTc0NTgxNDc2OCwiZXhwIjoxNzQ1ODE4MzY4LCJpYXQiOjE3NDU4MTQ3NjgsImlzcyI6IlVzZXJzQXBpIiwiYXVkIjoiVXNlcnNBcGlDbGllbnRzIn0.DMH9cd_y6SZHGfmLCeb4UmNum2Gw1QFdaa2CatOLarI
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJ0ZXN0LnVzZXJAZXhhbXBsZS5jb20iLCJnaXZlbl9uYW1lIjoiVGVzdCIsImZhbWlseV9uYW1lIjoiVXNlciIsImp0aSI6ImRiZDdlOTc2LTk2MzEtNDMwOS04NjA2LTk4ZjhhZTk1YzBjNCIsIm5iZiI6MTc0NTgyNjk0NywiZXhwIjoxNzQ1ODMwNTQ3LCJpYXQiOjE3NDU4MjY5NDcsImlzcyI6IlVzZXJzQXBpIiwiYXVkIjoiVXNlcnNBcGlDbGllbnRzIn0.5Eq1kpNOAXQCfT5ATASxG1AIOQuuf5jrDvfj8pqOlgg
 ### AUTH FLOW ###
 
 ### Register a new user 
@@ -50,11 +51,11 @@ Authorization: Bearer {{token}}
 {
   "firstName": "Allan",
   "lastName": "Taruc",
-  "email": "allan.b.taruc@gmail.com",
+  "email": "allan.taruc@test.com",
   "address": {
-    "street": "Paltoc",
+    "street": "Manila",
     "city": "Manila",
-    "postCode": 1016
+    "postCode": 1000
   },
   "employments": [
     {
@@ -74,7 +75,7 @@ Authorization: Bearer {{token}}
 {
   "firstName": "Jane",
   "lastName": "Smith",
-  "email": "allan.b.taruc@gmail.com",
+  "email": "allan.taruc@test.com",
   "address": {
     "street": "456 Park Ave",
     "city": "Boston",
@@ -103,14 +104,14 @@ Authorization: Bearer {{token}}
 }
 
 ### PUT - Update user (valid data)
-PUT {{address}}/api/users/1
+PUT {{address}}/api/users/2
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
   "firstName": "Allan B",
   "lastName": "Taruc",
-  "email": "allan.taruc@gmail.com",
+  "email": "allan.taruc@test.com",
   "address": {
     "street": "789 Broadway",
     "city": "Chicago",
@@ -127,14 +128,14 @@ Authorization: Bearer {{token}}
 }
 
 ### PUT - Update user (address changes only)
-PUT {{address}}/api/users/1
+PUT {{address}}/api/users/2
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
   "firstName": "Allan B",
   "lastName": "Taruc",
-  "email": "allan.taruc@gmail.com",
+  "email": "allan.taruc@test.com",
   "address": {
     "street": "555 Fifth Ave",
     "city": "San Francisco",
@@ -143,14 +144,14 @@ Authorization: Bearer {{token}}
 }
 
 ### PUT - Update user (employment changes only)
-PUT {{address}}/api/users/1
+PUT {{address}}/api/users/2
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
   "firstName": "Allan B",
   "lastName": "Taruc",
-  "email": "allan.taruc@gmail.com",
+  "email": "allan.taruc@test.com",
   "employments": [
     {
       "company": "Latest Corp",
@@ -170,14 +171,14 @@ Authorization: Bearer {{token}}
 }
 
 ### PUT - Update user (invalid employment dates)
-PUT {{address}}/api/users/1
+PUT {{address}}/api/users/2
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
   "firstName": "Allan B",
   "lastName": "Taruc",
-  "email": "allan.taruc@gmail.com",
+  "email": "allan.taruc@test.com",
   "employments": [
     {
       "company": "Problem Corp",
@@ -199,7 +200,7 @@ Authorization: Bearer {{token}}
   "lastName": "Smith",
   "email": "jane.smith@email.com",
   "address": {
-    "street": "Paltoc",
+    "street": "Smith",
     "city": "Manila",
     "postCode": 1016
   },
@@ -214,18 +215,18 @@ Authorization: Bearer {{token}}
 }
 
 ### PUT - Update user (duplicate email)
-PUT {{address}}/api/users/2
+PUT {{address}}/api/users/3
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
   "firstName": "Jane",
   "lastName": "Smith",
-  "email": "allan.taruc@gmail.com"
+  "email": "allan.taruc@test.com"
 }
 
 ### DELETE - Delete a user
-DELETE {{address}}/api/users/1
+DELETE {{address}}/api/users/2
 Authorization: Bearer {{token}}
 
 ###
