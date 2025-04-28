@@ -10,7 +10,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         await ValidateEmailUniquenessAsync(user);
         
         ValidateEmploymentDates(user.Employments);
-
+        
         await dbContext.Users.AddAsync(user);
         await dbContext.SaveChangesAsync();
         return user;
@@ -71,7 +71,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         }
         
         // Just check if any matching users exist without loading them
-        bool emailExists = await query.AnyAsync();
+        var emailExists = await query.AnyAsync();
         
         if (emailExists)
         {
