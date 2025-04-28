@@ -186,6 +186,25 @@ The project includes GitHub Actions workflows for:
 - Continuous Integration (build and test)
 - Code Quality Analysis
 
+## Branch Protection Setup
+
+To enforce quality standards and prevent merging PRs when builds or tests fail:
+
+1. Go to repository Settings > Branches > Branch protection rules > Add rule
+2. Under "Branch name pattern" enter `main`
+3. Enable the following options:
+   - ✅ Require a pull request before merging
+   - ✅ Require status checks to pass before merging
+   - ✅ Require branches to be up to date before merging
+4. Under "Status checks that are required":
+   - Search for and select `build-and-test` (from the .NET CI workflow)
+5. Optionally, enable these additional protections:
+   - ✅ Require conversation resolution before merging
+   - ✅ Require linear history
+   - ✅ Do not allow bypassing the above settings
+
+With these settings, GitHub will prevent merging pull requests to the main branch until all the required status checks (including build and tests) pass successfully.
+
 ## Getting Started
 
 1. Clone the repository
