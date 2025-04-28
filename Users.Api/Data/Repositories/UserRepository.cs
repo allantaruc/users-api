@@ -10,7 +10,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         await ValidateEmailUniquenessAsync(user);
         
         ValidateEmploymentDates(user.Employments);
-
+        
         await dbContext.Users.AddAsync(user);
         await dbContext.SaveChangesAsync();
         return user;
@@ -19,6 +19,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
     public async Task<User> GetUserByIdAsync(int id)
     {
         return (await dbContext.Users
+            .AsNoTracking()
             .Include(u => u.Address)
             .Include(u => u.Employments)
             .FirstOrDefaultAsync(u => u.Id == id) ?? null) ?? throw new InvalidOperationException();
@@ -27,6 +28,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
     public async Task<IEnumerable<User>> GetAllUsersAsync()
     {
         return await dbContext.Users
+            .AsNoTracking()
             .Include(u => u.Address)
             .Include(u => u.Employments)
             .ToListAsync();
@@ -68,9 +70,10 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
             query = query.Where(u => u.Id != user.Id);
         }
         
-        var existingUser = await query.FirstOrDefaultAsync();
+        // Just check if any matching users exist without loading them
+        var emailExists = await query.AnyAsync();
         
-        if (existingUser != null)
+        if (emailExists)
         {
             throw new InvalidOperationException(
                 isUpdate

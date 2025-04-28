@@ -6,16 +6,23 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Users.Api.Data;
 using Users.Api.Data.Repositories;
+using Users.Api.Models;
 using Users.Api.Models.Auth;
 using Users.Api.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Users.Api.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 
+// Add FluentValidation
+builder.Services.AddFluentValidationClientsideAdapters();
+
 // Configure Entity Framework with SQLite
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContextPool<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configure JWT
@@ -61,6 +68,10 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Register validators
+builder.Services.AddValidatorsFromAssemblyContaining<AddressValidator>();
+builder.Services.AddScoped<IValidator<User>, UserValidator>();
 
 // Add health checks
 builder.Services.AddHealthChecks()

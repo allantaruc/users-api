@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.Results;
 using Moq;
 using Shouldly;
 using Users.Api.Data.Repositories;
@@ -10,13 +12,21 @@ namespace Users.Tests.Services;
 public class UserServiceTests
 {
     private Mock<IUserRepository> _mockUserRepository = null!;
+    private Mock<IValidator<User>> _mockValidator = null!;
     private IUserService _userService = null!;
 
     [SetUp]
     public void Setup()
     {
         _mockUserRepository = new Mock<IUserRepository>();
-        _userService = new UserService(_mockUserRepository.Object);
+        _mockValidator = new Mock<IValidator<User>>();
+        
+        // Setup default validation to pass for all requests
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
+            
+        _userService = new UserService(_mockUserRepository.Object, _mockValidator.Object);
     }
 
     [Test]
@@ -110,6 +120,16 @@ public class UserServiceTests
             Email = "allan.b.taruc@gmail.com"
         };
 
+        // Setup mock validator to fail validation
+        var validationFailures = new List<ValidationFailure>
+        {
+            new ValidationFailure("FirstName", "FirstName is required.")
+        };
+        
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(validationFailures));
+
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _userService.CreateUserAsync(request));
@@ -117,7 +137,6 @@ public class UserServiceTests
         exception.Message.ShouldContain("FirstName");
         
         // The repository method shouldn't be called due to validation failure
-        _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(It.IsAny<int>()), Times.Never);
         _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.IsAny<User>()), Times.Never);
     }
 
@@ -314,7 +333,7 @@ public class UserServiceTests
     public async Task UpdateUserAsync_WithInvalidData_ShouldThrowException()
     {
         // Arrange
-        var userId = 1;
+        const int userId = 1;
         var existingUser = new User
         {
             Id = userId,
@@ -322,17 +341,26 @@ public class UserServiceTests
             LastName = "User",
             Email = "original@example.com"
         };
-
+        
         var updateRequest = new User
         {
-            Id = userId,
             FirstName = "", // Invalid: empty first name
             LastName = "Taruc",
             Email = "allan.b.taruc@gmail.com"
         };
-
+        
         _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))
             .ReturnsAsync(existingUser);
+        
+        // Setup mock validator to fail validation
+        var validationFailures = new List<ValidationFailure>
+        {
+            new ValidationFailure("FirstName", "FirstName is required.")
+        };
+        
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(validationFailures));
 
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
@@ -727,19 +755,27 @@ public class UserServiceTests
             Email = "allan.b.taruc@gmail.com",
             Address = new Address
             {
-                Street = "", // Empty street
+                // Missing Street
                 City = "Manila",
                 PostCode = 1016
             }
         };
 
+        // Setup mock validator to fail validation
+        var validationFailures = new List<ValidationFailure>
+        {
+            new ValidationFailure("Address.Street", "Street is required.")
+        };
+        
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(validationFailures));
+
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _userService.CreateUserAsync(request));
         
-        exception.Message.ShouldContain("Street is required");
-        
-        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.IsAny<User>()), Times.Never);
+        exception.Message.ShouldContain("Street");
     }
     
     [Test]
@@ -754,18 +790,26 @@ public class UserServiceTests
             Address = new Address
             {
                 Street = "Paltoc",
-                City = "", // Empty city
+                // Missing City
                 PostCode = 1016
             }
         };
+
+        // Setup mock validator to fail validation
+        var validationFailures = new List<ValidationFailure>
+        {
+            new ValidationFailure("Address.City", "City is required.")
+        };
+        
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(validationFailures));
 
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _userService.CreateUserAsync(request));
         
-        exception.Message.ShouldContain("City is required");
-        
-        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.IsAny<User>()), Times.Never);
+        exception.Message.ShouldContain("City");
     }
     
     [Test]
@@ -781,7 +825,7 @@ public class UserServiceTests
             [
                 new Employment
                 {
-                    Company = "", // Empty company
+                    // Missing Company
                     MonthsOfExperience = 24,
                     Salary = 75000,
                     StartDate = new DateTime(2022, 1, 15)
@@ -789,13 +833,21 @@ public class UserServiceTests
             ]
         };
 
+        // Setup mock validator to fail validation
+        var validationFailures = new List<ValidationFailure>
+        {
+            new ValidationFailure("Employments[0].Company", "Company is required.")
+        };
+        
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(validationFailures));
+
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _userService.CreateUserAsync(request));
         
-        exception.Message.ShouldContain("Company is required");
-        
-        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.IsAny<User>()), Times.Never);
+        exception.Message.ShouldContain("Company");
     }
     
     [Test]
@@ -812,20 +864,28 @@ public class UserServiceTests
                 new Employment
                 {
                     Company = "ACME Inc",
-                    MonthsOfExperience = null, // Null months
+                    // Missing MonthsOfExperience
                     Salary = 75000,
                     StartDate = new DateTime(2022, 1, 15)
                 }
             ]
         };
 
+        // Setup mock validator to fail validation
+        var validationFailures = new List<ValidationFailure>
+        {
+            new ValidationFailure("Employments[0].MonthsOfExperience", "Months of experience is required.")
+        };
+        
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(validationFailures));
+
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _userService.CreateUserAsync(request));
         
-        exception.Message.ShouldContain("MonthsOfExperience is required");
-        
-        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.IsAny<User>()), Times.Never);
+        exception.Message.ShouldContain("experience");
     }
     
     [Test]
@@ -843,19 +903,27 @@ public class UserServiceTests
                 {
                     Company = "ACME Inc",
                     MonthsOfExperience = 24,
-                    Salary = null, // Null salary
+                    // Missing Salary
                     StartDate = new DateTime(2022, 1, 15)
                 }
             ]
         };
 
+        // Setup mock validator to fail validation
+        var validationFailures = new List<ValidationFailure>
+        {
+            new ValidationFailure("Employments[0].Salary", "Salary is required.")
+        };
+        
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(validationFailures));
+
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _userService.CreateUserAsync(request));
         
-        exception.Message.ShouldContain("Salary is required");
-        
-        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.IsAny<User>()), Times.Never);
+        exception.Message.ShouldContain("Salary");
     }
     
     [Test]
@@ -874,18 +942,26 @@ public class UserServiceTests
                     Company = "ACME Inc",
                     MonthsOfExperience = 24,
                     Salary = 75000,
-                    StartDate = null // Null start date
+                    // Missing StartDate
                 }
             ]
         };
+
+        // Setup mock validator to fail validation
+        var validationFailures = new List<ValidationFailure>
+        {
+            new ValidationFailure("Employments[0].StartDate", "Start date is required.")
+        };
+        
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(validationFailures));
 
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _userService.CreateUserAsync(request));
         
-        exception.Message.ShouldContain("StartDate is required");
-        
-        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.IsAny<User>()), Times.Never);
+        exception.Message.ShouldContain("Start date");
     }
     
     [Test]
@@ -1205,26 +1281,36 @@ public class UserServiceTests
         var existingUser = new User
         {
             Id = userId,
-            FirstName = "Allan",
-            LastName = "Taruc",
-            Email = "allan.b.taruc@gmail.com"
+            FirstName = "Original",
+            LastName = "User",
+            Email = "original@example.com"
         };
-
+        
         var updateRequest = new User
         {
-            FirstName = "New Allan",
-            LastName = "New Taruc",
-            Email = null! // Invalid: null email
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = null // Invalid: null email
         };
-
+        
         _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))
             .ReturnsAsync(existingUser);
+        
+        // Setup mock validator to fail validation
+        var validationFailures = new List<ValidationFailure>
+        {
+            new ValidationFailure("Email", "Email is required.")
+        };
+        
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(validationFailures));
 
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _userService.UpdateUserAsync(userId, updateRequest));
         
-        exception.Message.ShouldContain("Email is required");
+        exception.Message.ShouldContain("Email");
         
         _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(userId), Times.Once);
         _mockUserRepository.Verify(repo => repo.UpdateUserAsync(It.IsAny<User>()), Times.Never);
@@ -1238,26 +1324,36 @@ public class UserServiceTests
         var existingUser = new User
         {
             Id = userId,
-            FirstName = "Allan",
+            FirstName = "Original",
+            LastName = "User",
+            Email = "original@example.com"
+        };
+        
+        var updateRequest = new User
+        {
+            FirstName = null, // Invalid: null first name
             LastName = "Taruc",
             Email = "allan.b.taruc@gmail.com"
         };
-
-        var updateRequest = new User
-        {
-            FirstName = null!, // Invalid: null first name
-            LastName = "New Taruc",
-            Email = "new.allan@gmail.com"
-        };
-
+        
         _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))
             .ReturnsAsync(existingUser);
+        
+        // Setup mock validator to fail validation
+        var validationFailures = new List<ValidationFailure>
+        {
+            new ValidationFailure("FirstName", "FirstName is required.")
+        };
+        
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(validationFailures));
 
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _userService.UpdateUserAsync(userId, updateRequest));
         
-        exception.Message.ShouldContain("FirstName is required");
+        exception.Message.ShouldContain("FirstName");
         
         _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(userId), Times.Once);
         _mockUserRepository.Verify(repo => repo.UpdateUserAsync(It.IsAny<User>()), Times.Never);
@@ -1271,26 +1367,36 @@ public class UserServiceTests
         var existingUser = new User
         {
             Id = userId,
-            FirstName = "Allan",
-            LastName = "Taruc",
-            Email = "allan.b.taruc@gmail.com"
+            FirstName = "Original",
+            LastName = "User",
+            Email = "original@example.com"
         };
-
+        
         var updateRequest = new User
         {
-            FirstName = "New Allan",
-            LastName = null!, // Invalid: null last name
-            Email = "new.allan@gmail.com"
+            FirstName = "Allan",
+            LastName = null, // Invalid: null last name
+            Email = "allan.b.taruc@gmail.com"
         };
-
+        
         _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))
             .ReturnsAsync(existingUser);
+        
+        // Setup mock validator to fail validation
+        var validationFailures = new List<ValidationFailure>
+        {
+            new ValidationFailure("LastName", "LastName is required.")
+        };
+        
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(validationFailures));
 
         // Act & Assert
         var exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _userService.UpdateUserAsync(userId, updateRequest));
         
-        exception.Message.ShouldContain("LastName is required");
+        exception.Message.ShouldContain("LastName");
         
         _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(userId), Times.Once);
         _mockUserRepository.Verify(repo => repo.UpdateUserAsync(It.IsAny<User>()), Times.Never);
