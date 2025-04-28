@@ -213,15 +213,24 @@ var assemblies = [
   {
     "name": "Users.Api",
     "classes": [
-      { "name": "Program", "rp": "Users.Api_Program.html", "cl": 0, "ucl": 21, "cal": 21, "tl": 43, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Users.Api.Controllers.UsersController", "rp": "Users.Api_UsersController.html", "cl": 39, "ucl": 0, "cal": 39, "tl": 70, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Users.Api.Data.AppDbContext", "rp": "Users.Api_AppDbContext.html", "cl": 47, "ucl": 0, "cal": 47, "tl": 72, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Program", "rp": "Users.Api_Program.html", "cl": 0, "ucl": 112, "cal": 112, "tl": 153, "cb": 0, "tb": 16, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Controllers.AuthController", "rp": "Users.Api_AuthController.html", "cl": 26, "ucl": 0, "cal": 26, "tl": 75, "cb": 17, "tb": 20, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Controllers.UsersController", "rp": "Users.Api_UsersController.html", "cl": 60, "ucl": 0, "cal": 60, "tl": 139, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Data.AppDbContext", "rp": "Users.Api_AppDbContext.html", "cl": 53, "ucl": 0, "cal": 53, "tl": 81, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Users.Api.Data.DbInitializer", "rp": "Users.Api_DbInitializer.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Users.Api.Data.Repositories.UserRepository", "rp": "Users.Api_UserRepository.html", "cl": 48, "ucl": 0, "cal": 48, "tl": 79, "cb": 22, "tb": 22, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Data.Repositories.UserRepository", "rp": "Users.Api_UserRepository.html", "cl": 62, "ucl": 0, "cal": 62, "tl": 99, "cb": 24, "tb": 24, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Migrations.AddPasswordFieldsToUsers", "rp": "Users.Api_AddPasswordFieldsToUsers.html", "cl": 0, "ucl": 134, "cal": 134, "tl": 181, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Migrations.AppDbContextModelSnapshot", "rp": "Users.Api_AppDbContextModelSnapshot.html", "cl": 0, "ucl": 114, "cal": 114, "tl": 139, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Users.Api.Models.Address", "rp": "Users.Api_Address.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 10, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Models.Auth.AuthResponse", "rp": "Users.Api_AuthResponse.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 22, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Models.Auth.JwtSettings", "rp": "Users.Api_JwtSettings.html", "cl": 4, "ucl": 0, "cal": 4, "tl": 27, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Models.Auth.LoginRequest", "rp": "Users.Api_LoginRequest.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Models.Auth.RegisterRequest", "rp": "Users.Api_RegisterRequest.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 32, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Models.Auth.UserInfo", "rp": "Users.Api_UserInfo.html", "cl": 4, "ucl": 0, "cal": 4, "tl": 27, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Users.Api.Models.Employment", "rp": "Users.Api_Employment.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Users.Api.Models.User", "rp": "Users.Api_User.html", "cl": 10, "ucl": 0, "cal": 10, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Users.Api.Services.UserService", "rp": "Users.Api_UserService.html", "cl": 68, "ucl": 4, "cal": 72, "tl": 120, "cb": 29, "tb": 32, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Models.User", "rp": "Users.Api_User.html", "cl": 12, "ucl": 0, "cal": 12, "tl": 18, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Services.AuthService", "rp": "Users.Api_AuthService.html", "cl": 128, "ucl": 0, "cal": 128, "tl": 199, "cb": 14, "tb": 14, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Users.Api.Services.UserService", "rp": "Users.Api_UserService.html", "cl": 78, "ucl": 0, "cal": 78, "tl": 130, "cb": 30, "tb": 30, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
 ];
 
@@ -236,9 +245,15 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "Users.Api", "class": "Users.Api.Services.UserService", "reportPath": "Users.Api_UserService.html", "methodName": "ValidateCreateUserRequest(Users.Api.Models.User)", "methodShortName": "ValidateCreateUserRequest(...)", "fileIndex": 0, "line": 68,
+    "assembly": "Users.Api", "class": "Program", "reportPath": "Users.Api_Program.html", "methodName": "<Main>$(System.String[])", "methodShortName": "<Main>$(...)", "fileIndex": 0, "line": 12,
     "metrics": [
-      { "value": 23, "exceeded": false },
+      { "value": 272, "exceeded": true },
+      { "value": 16, "exceeded": true },
+    ]},
+  {
+    "assembly": "Users.Api", "class": "Users.Api.Services.UserService", "reportPath": "Users.Api_UserService.html", "methodName": "ValidateCreateUserRequest(Users.Api.Models.User)", "methodShortName": "ValidateCreateUserRequest(...)", "fileIndex": 0, "line": 78,
+    "metrics": [
+      { "value": 22, "exceeded": false },
       { "value": 22, "exceeded": true },
     ]},
 ];

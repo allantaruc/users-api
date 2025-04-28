@@ -1070,4 +1070,470 @@ public class UserServiceTests
         
         _mockUserRepository.Verify(repo => repo.DeleteUserAsync(userId), Times.Once);
     }
+
+    [Test]
+    public async Task CreateUserAsync_WithEmptyEmploymentsList_ShouldCreateUserWithEmptyList()
+    {
+        // Arrange
+        var request = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com",
+            Employments = []
+        };
+
+        var createdUser = new User
+        {
+            Id = 1,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Email = request.Email,
+            Employments = []
+        };
+
+        _mockUserRepository.Setup(repo => repo.CreateUserAsync(It.IsAny<User>()))
+            .ReturnsAsync(createdUser);
+
+        // Act
+        var result = await _userService.CreateUserAsync(request);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Employments.ShouldNotBeNull();
+        result.Employments.Count.ShouldBe(0);
+        
+        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.Is<User>(u => 
+            u.Employments.Count == 0)), Times.Once);
+    }
+    
+    [Test]
+    public async Task CreateUserAsync_WithNullAddress_ShouldCreateUserWithoutAddress()
+    {
+        // Arrange
+        var request = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com",
+            Address = null
+        };
+
+        var createdUser = new User
+        {
+            Id = 1,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Email = request.Email,
+            Address = null
+        };
+
+        _mockUserRepository.Setup(repo => repo.CreateUserAsync(It.IsAny<User>()))
+            .ReturnsAsync(createdUser);
+
+        // Act
+        var result = await _userService.CreateUserAsync(request);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Address.ShouldBeNull();
+        
+        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.Is<User>(u => 
+            u.Address == null)), Times.Once);
+    }
+    
+    [Test]
+    public async Task UpdateUserAsync_WithNoAddress_ShouldPreserveExistingAddress()
+    {
+        // Arrange
+        const int userId = 1;
+        var existingUser = new User
+        {
+            Id = userId,
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com",
+            Address = new Address
+            {
+                Street = "Existing Street",
+                City = "Existing City",
+                PostCode = 1000
+            }
+        };
+
+        var updateRequest = new User
+        {
+            FirstName = "New Allan",
+            LastName = "New Taruc",
+            Email = "new.allan@gmail.com",
+            Address = null // No address in update request
+        };
+
+        var expectedUpdatedUser = new User
+        {
+            Id = userId,
+            FirstName = updateRequest.FirstName,
+            LastName = updateRequest.LastName,
+            Email = updateRequest.Email,
+            Address = existingUser.Address // Should be preserved
+        };
+
+        _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+            .ReturnsAsync(existingUser);
+        
+        _mockUserRepository.Setup(repo => repo.UpdateUserAsync(It.IsAny<User>()))
+            .ReturnsAsync(expectedUpdatedUser);
+
+        // Act
+        var result = await _userService.UpdateUserAsync(userId, updateRequest);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Address.ShouldNotBeNull();
+        result.Address!.Street.ShouldBe("Existing Street");
+        result.Address.City.ShouldBe("Existing City");
+        
+        _mockUserRepository.Verify(repo => repo.UpdateUserAsync(It.Is<User>(u => 
+            u.Address == existingUser.Address)), Times.Once);
+    }
+    
+    [Test]
+    public async Task UpdateUserAsync_WithNullEmail_ShouldThrowException()
+    {
+        // Arrange
+        const int userId = 1;
+        var existingUser = new User
+        {
+            Id = userId,
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com"
+        };
+
+        var updateRequest = new User
+        {
+            FirstName = "New Allan",
+            LastName = "New Taruc",
+            Email = null! // Invalid: null email
+        };
+
+        _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+            .ReturnsAsync(existingUser);
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<ArgumentException>(
+            async () => await _userService.UpdateUserAsync(userId, updateRequest));
+        
+        exception.Message.ShouldContain("Email is required");
+        
+        _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(userId), Times.Once);
+        _mockUserRepository.Verify(repo => repo.UpdateUserAsync(It.IsAny<User>()), Times.Never);
+    }
+    
+    [Test]
+    public async Task UpdateUserAsync_WithNullFirstName_ShouldThrowException()
+    {
+        // Arrange
+        const int userId = 1;
+        var existingUser = new User
+        {
+            Id = userId,
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com"
+        };
+
+        var updateRequest = new User
+        {
+            FirstName = null!, // Invalid: null first name
+            LastName = "New Taruc",
+            Email = "new.allan@gmail.com"
+        };
+
+        _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+            .ReturnsAsync(existingUser);
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<ArgumentException>(
+            async () => await _userService.UpdateUserAsync(userId, updateRequest));
+        
+        exception.Message.ShouldContain("FirstName is required");
+        
+        _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(userId), Times.Once);
+        _mockUserRepository.Verify(repo => repo.UpdateUserAsync(It.IsAny<User>()), Times.Never);
+    }
+    
+    [Test]
+    public async Task UpdateUserAsync_WithNullLastName_ShouldThrowException()
+    {
+        // Arrange
+        const int userId = 1;
+        var existingUser = new User
+        {
+            Id = userId,
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com"
+        };
+
+        var updateRequest = new User
+        {
+            FirstName = "New Allan",
+            LastName = null!, // Invalid: null last name
+            Email = "new.allan@gmail.com"
+        };
+
+        _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+            .ReturnsAsync(existingUser);
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<ArgumentException>(
+            async () => await _userService.UpdateUserAsync(userId, updateRequest));
+        
+        exception.Message.ShouldContain("LastName is required");
+        
+        _mockUserRepository.Verify(repo => repo.GetUserByIdAsync(userId), Times.Once);
+        _mockUserRepository.Verify(repo => repo.UpdateUserAsync(It.IsAny<User>()), Times.Never);
+    }
+
+    [Test]
+    public async Task CreateUserAsync_WithAddressMissingPostCode_ShouldStillCreateUser()
+    {
+        // Arrange
+        var request = new User
+        {
+            FirstName = "Allan",
+            LastName = "Taruc",
+            Email = "allan.b.taruc@gmail.com",
+            Address = new Address
+            {
+                Street = "Test Street",
+                City = "Test City",
+                PostCode = null // PostCode is optional
+            }
+        };
+
+        var createdUser = new User
+        {
+            Id = 1,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Email = request.Email,
+            Address = request.Address
+        };
+
+        _mockUserRepository.Setup(repo => repo.CreateUserAsync(It.IsAny<User>()))
+            .ReturnsAsync(createdUser);
+
+        // Act
+        var result = await _userService.CreateUserAsync(request);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Address.ShouldNotBeNull();
+        result.Address!.Street.ShouldBe("Test Street");
+        result.Address.City.ShouldBe("Test City");
+        result.Address.PostCode.ShouldBeNull();
+        
+        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.Is<User>(u => 
+            u.Address!.PostCode == null)), Times.Once);
+    }
+    
+    [Test]
+    public async Task CreateUserAsync_WithBothAddressAndEmployments_ShouldCreateComplete()
+    {
+        // Arrange
+        var request = new User
+        {
+            FirstName = "Full",
+            LastName = "User",
+            Email = "full.user@example.com",
+            Address = new Address
+            {
+                Street = "Complete Street",
+                City = "Complete City",
+                PostCode = 1234
+            },
+            Employments =
+            [
+                new Employment
+                {
+                    Company = "Complete Company",
+                    MonthsOfExperience = 36,
+                    Salary = 80000,
+                    StartDate = new DateTime(2020, 1, 1)
+                }
+            ]
+        };
+
+        var createdUser = new User
+        {
+            Id = 1,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Email = request.Email,
+            Address = request.Address,
+            Employments = request.Employments
+        };
+
+        _mockUserRepository.Setup(repo => repo.CreateUserAsync(It.IsAny<User>()))
+            .ReturnsAsync(createdUser);
+
+        // Act
+        var result = await _userService.CreateUserAsync(request);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Address.ShouldNotBeNull();
+        result.Address!.Street.ShouldBe("Complete Street");
+        result.Address.City.ShouldBe("Complete City");
+        result.Address.PostCode.ShouldBe(1234);
+        
+        result.Employments.ShouldNotBeNull();
+        result.Employments.Count.ShouldBe(1);
+        result.Employments[0].Company.ShouldBe("Complete Company");
+        result.Employments[0].MonthsOfExperience.HasValue.ShouldBeTrue();
+        result.Employments[0].MonthsOfExperience!.Value.ShouldBe(36U);
+        result.Employments[0].Salary.HasValue.ShouldBeTrue();
+        result.Employments[0].Salary!.Value.ShouldBe(80000U);
+        
+        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.Is<User>(u => 
+            u.Address!.City == "Complete City" && 
+            u.Employments.Count == 1)), Times.Once);
+    }
+    
+    [Test]
+    public async Task UpdateUserAsync_WithBothAddressAndEmploymentChanges_ShouldUpdateBoth()
+    {
+        // Arrange
+        const int userId = 1;
+        var existingUser = new User
+        {
+            Id = userId,
+            FirstName = "Original",
+            LastName = "User",
+            Email = "original@example.com",
+            Address = new Address
+            {
+                Street = "Original Street",
+                City = "Original City",
+                PostCode = 1000
+            },
+            Employments =
+            [
+                new Employment
+                {
+                    Company = "Original Company",
+                    MonthsOfExperience = 12,
+                    Salary = 50000,
+                    StartDate = new DateTime(2020, 1, 1)
+                }
+            ]
+        };
+
+        var updateRequest = new User
+        {
+            FirstName = "Updated",
+            LastName = "User",
+            Email = "updated@example.com",
+            Address = new Address
+            {
+                Street = "New Street",
+                City = "New City",
+                PostCode = 2000
+            },
+            Employments =
+            [
+                new Employment
+                {
+                    Company = "New Company",
+                    MonthsOfExperience = 24,
+                    Salary = 70000,
+                    StartDate = new DateTime(2021, 1, 1)
+                }
+            ]
+        };
+
+        var updatedUser = new User
+        {
+            Id = userId,
+            FirstName = updateRequest.FirstName,
+            LastName = updateRequest.LastName,
+            Email = updateRequest.Email,
+            Address = updateRequest.Address,
+            Employments = updateRequest.Employments
+        };
+
+        _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+            .ReturnsAsync(existingUser);
+        
+        _mockUserRepository.Setup(repo => repo.UpdateUserAsync(It.IsAny<User>()))
+            .ReturnsAsync(updatedUser);
+
+        // Act
+        var result = await _userService.UpdateUserAsync(userId, updateRequest);
+
+        // Assert
+        result.ShouldNotBeNull();
+        
+        // Basic properties
+        result.FirstName.ShouldBe("Updated");
+        result.LastName.ShouldBe("User");
+        result.Email.ShouldBe("updated@example.com");
+        
+        // Address should be updated
+        result.Address.ShouldNotBeNull();
+        result.Address!.Street.ShouldBe("New Street");
+        result.Address.City.ShouldBe("New City");
+        result.Address.PostCode.ShouldBe(2000);
+        
+        // Employments should be updated
+        result.Employments.ShouldNotBeNull();
+        result.Employments.Count.ShouldBe(1);
+        result.Employments[0].Company.ShouldBe("New Company");
+        result.Employments[0].MonthsOfExperience.HasValue.ShouldBeTrue();
+        result.Employments[0].MonthsOfExperience!.Value.ShouldBe(24U);
+        result.Employments[0].Salary.HasValue.ShouldBeTrue();
+        result.Employments[0].Salary!.Value.ShouldBe(70000U);
+        
+        _mockUserRepository.Verify(repo => repo.UpdateUserAsync(It.Is<User>(u => 
+            u.Address!.City == "New City" && 
+            u.Employments[0].Company == "New Company")), Times.Once);
+    }
+    
+    [Test]
+    public async Task CreateUserAsync_WithInvalidEmploymentEndDate_RepositoryThrows()
+    {
+        // Arrange
+        var request = new User
+        {
+            FirstName = "Test",
+            LastName = "User",
+            Email = "test@example.com",
+            Employments =
+            [
+                new Employment
+                {
+                    Company = "Test Company",
+                    MonthsOfExperience = 12,
+                    Salary = 50000,
+                    StartDate = new DateTime(2022, 1, 1),
+                    EndDate = new DateTime(2021, 1, 1) // End date before start date
+                }
+            ]
+        };
+
+        // Repository will validate employment dates
+        _mockUserRepository.Setup(repo => repo.CreateUserAsync(It.IsAny<User>()))
+            .ThrowsAsync(new ArgumentException("Employment end date (01/01/2021) must be after start date (01/01/2022) for company 'Test Company'."));
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<ArgumentException>(
+            async () => await _userService.CreateUserAsync(request));
+        
+        exception.Message.ShouldContain("Employment end date");
+        exception.Message.ShouldContain("must be after start date");
+        
+        _mockUserRepository.Verify(repo => repo.CreateUserAsync(It.IsAny<User>()), Times.Once);
+    }
 } 
