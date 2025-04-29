@@ -29,19 +29,6 @@ builder.Services.AddDbContextPool<AppDbContext>(options =>
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
-// Override JWT Secret Key from environment variable in production
-if (!builder.Environment.IsDevelopment())
-{
-    var envJwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
-    if (!string.IsNullOrEmpty(envJwtSecret))
-    {
-        if (jwtSettings != null)
-        {
-            jwtSettings.SecretKey = envJwtSecret;
-        }
-    }
-}
-
 // Add JWT authentication
 builder.Services.AddAuthentication(options =>
 {
